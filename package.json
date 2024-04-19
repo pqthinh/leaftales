@@ -6,8 +6,7 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web",
-    "lint": "eslint . --fix"
+    "web": "expo start --web"
   },
   "dependencies": {
     "@react-native-voice/voice": "^3.2.4",
@@ -23,11 +22,7 @@
     "react-native": "0.73.6"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0",
-    "eslint": "^8.57.0",
-    "eslint-config-universe": "^12.0.1",
-    "eslint-plugin-react-native": "^4.1.0",
-    "prettier": "^3.2.5"
+    "@babel/core": "^7.20.0"
   },
   "private": true
 }
