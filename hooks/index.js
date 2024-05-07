@@ -1,8 +1,11 @@
 import useDebounce from "./useDebounce";
 import useTimeoutFn from "./useTimeoutFn";
+import useVoiceControl from './useVoiceControl'
+import useBookReader from './useBookReader'
 
-const hooks ={
+export const hooks = {
     useDebounce,
-    useTimeoutFn
+    useTimeoutFn,
+    useVoiceControl,
+    useBookReader
 }
-export default hooks

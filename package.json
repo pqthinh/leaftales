@@ -9,14 +9,19 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@react-native-community/slider": "^4.5.2",
+    "@react-native-community/slider": "^4.4.2",
     "@react-native-picker/picker": "^2.7.5",
+    "@react-native-voice/voice": "^3.2.4",
+    "@react-navigation/native": "^6.1.17",
+    "@react-navigation/stack": "^6.3.29",
     "expo": "~50.0.14",
+    "expo-localization": "^14.8.4",
     "expo-speech": "~11.7.0",
     "expo-splash-screen": "^0.26.4",
     "expo-status-bar": "~1.11.1",
     "react": "18.2.0",
-    "react-native": "0.73.6"
+    "react-native": "0.73.6",
+    "react-native-highlight-text": "^0.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
