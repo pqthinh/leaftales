@@ -26,7 +26,7 @@ const BookReader = ({ route }) => {
   return (
     <View>
       {/* Display cover image */}
-      <Image source={cover} style={{ width: 200, height: 300 }} />
+      <Image source={{uri: cover}} style={{ width: 200, height: 300 }} />
       <Text>Title: {title}</Text>
       
       

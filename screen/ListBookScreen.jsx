@@ -27,15 +27,14 @@ const ListBook = () => {
     }
   }, []);
 
-  const handleBookPress = (bookId) => {
+  const handleBookPress = async (bookId) => {
     const fetchBook = async (bookId) => {
       setIsLoading(true)
       setError(null);
       return book_detail;
     }
     try {
-      const book = fetchBook(bookId);
-      console.log(book)
+      const book = await fetchBook(bookId);
       navigation.navigate('BookDetail', { ...book });
     } catch(err) {
       setError(err.message)
