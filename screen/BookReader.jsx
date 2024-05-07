@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, Button } from 'react-native'; // Assuming you're using React Native
+import { View, Text, Image, Button, StyleSheet } from 'react-native'; // Assuming you're using React Native
 import useBookReader from '../hooks/useBookReader'; // Path to your custom hook
 
 const BookReader = ({ route }) => {
@@ -24,20 +24,18 @@ const BookReader = ({ route }) => {
   const currentSentence = currentChapter.sentences[sentenceIndex];
 
   return (
-    <View>
-      {/* Display cover image */}
-      <Image source={{uri: cover}} style={{ width: 200, height: 300 }} />
+    <View style={styles.container}>
+      <Image source={{uri: cover}} style={styles.coverBook} />
       <Text>Title: {title}</Text>
       
       
       <Text>Chapter: {currentChapter.title}</Text>
       <Text>{currentSentence}</Text>
 
-
       <Text>Progress: {progressPercentage}%</Text>
 
 
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+      <View style={styles.function}>
         <Button title="Previous Sentence" onPress={() => seekToSentence(chapterIndex, Math.max(0, sentenceIndex - 1))} />
         <Button title="Pause" onPress={pauseSpeech} disabled={playbackState !== 'playing'} />
         <Button title="Play" onPress={speakNextSentence} disabled={playbackState === 'playing'} />
@@ -48,4 +46,19 @@ const BookReader = ({ route }) => {
   );
 };
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    marginHorizontal: 10
+  },
+  coverBook: {
+    width: '80%',
+    height: 150,
+    objectFit: "cover"
+  },
+  function: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between' 
+  }
+})
 export default BookReader;

@@ -37,17 +37,15 @@ export const book_detail = {
         'Once upon a time, in a faraway land, there lived a young prince.',
         'He was known for his bravery and kindness to all creatures.',
         'Add more sentences for chapter 1 if needed',
-        [
-          ...`Từ thời xa xưa cho đến ngày nay, dân tộc Việt Nam luôn coi trọng và tự hào với ngôn ngữ quốc gia của mình - tiếng Việt. Tiếng Việt không chỉ là một phương tiện truyền đạt thông tin mà còn là biểu tượng văn hóa, là bản sắc tinh tế của đất nước. Sự giàu có và đẹp đẽ của tiếng Việt không chỉ hiện diện trong các yếu tố cơ bản mà còn được thể hiện qua sự hài hòa về âm hưởng và thanh điệu.
+        ...`Từ thời xa xưa cho đến ngày nay, dân tộc Việt Nam luôn coi trọng và tự hào với ngôn ngữ quốc gia của mình - tiếng Việt. Tiếng Việt không chỉ là một phương tiện truyền đạt thông tin mà còn là biểu tượng văn hóa, là bản sắc tinh tế của đất nước. Sự giàu có và đẹp đẽ của tiếng Việt không chỉ hiện diện trong các yếu tố cơ bản mà còn được thể hiện qua sự hài hòa về âm hưởng và thanh điệu.
   
           Tiếng Việt, trong mắt người Việt Nam, không chỉ là một công cụ giao tiếp mà còn là nguồn cảm hứng sáng tạo, là ngôn ngữ của tình cảm, tư tưởng, và truyền thống lâu dài. Với đặc điểm giàu chất nhạc, tiếng Việt có khả năng truyền tải những ý nghĩa sâu sắc, tình cảm phong phú của người Việt Nam.
           
           Qua thời gian, từ vựng trong tiếng Việt không ngừng phát triển và đa dạng, thể hiện sự tiến bộ và sáng tạo của cộng đồng. Ngữ pháp cũng trở nên uyển chuyển và chính xác hơn, giúp con người Việt Nam thể hiện ý nghĩa một cách sắc sảo và đa dạng.
           
           Chính vì vậy, trong thời đại ngày nay, con người Việt Nam càng cần biết giữ gìn và phát huy sự trong sáng, giàu đẹp của tiếng Việt. Qua việc trân trọng và bảo vệ ngôn ngữ quốc gia, chúng ta đồng thời bảo toàn và truyền đạt những giá trị văn hóa, truyền thống quý báu của dân tộc.`
-            .split(`.`)
-            .map(e => e + '.')
-        ]
+          .split(`.`)
+          .map(e => e.replace(/\\n/, '').trim() + '.')
       ]
     },
     {
