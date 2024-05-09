@@ -7,7 +7,7 @@ import {
   StyleSheet
 } from 'react-native'
 import { useNavigation } from '@react-navigation/native' // Assuming you're using React Navigation
-import PlaylistItem from './PlaylistItem' // Import the PlaylistItem component
+import PlaylistItem from '../component/PlaylistItem' // Import the PlaylistItem component
 
 const PlaylistScreen = () => {
   const navigation = useNavigation()

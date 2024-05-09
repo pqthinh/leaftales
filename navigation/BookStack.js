@@ -4,7 +4,7 @@ import ListBook from '../screen/ListBookScreen';
 import BookReader from '../screen/BookReader';
 import SearchScreen from '../screen/SearchScreen';
 import PlaylistScreen from '../screen/PlaylistScreen';
-import BookmarkScreen from '../screen/BookMarkScreen';
+import BookmarkScreen from '../screen/BookmarkScreen';
 
 const Stack = createStackNavigator();
 

@@ -1,11 +1,11 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import BookStack from './navigation/BookStack'; // Replace with your routes component
+import AppDrawer from './navigation/AppDrawer';
 
 export default function App() {
   return (
     <NavigationContainer>
-      <BookStack />
+      <AppDrawer />
     </NavigationContainer>
   );
 }
