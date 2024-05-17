@@ -1,8 +1,5 @@
-import Voice, {
-  SpeechErrorEvent,
-  SpeechResultsEvent,
-} from "@react-native-voice/voice";
 import { useState, useEffect, useCallback } from "react";
+import Voice from "@react-native-voice/voice";
 
 export const useVoiceRecognition = () => {
   const [state, setState] = useState({
@@ -27,7 +24,7 @@ export const useVoiceRecognition = () => {
       end: "",
       isRecording: false,
     });
-  }, []);
+  }, [setState]);
 
   const startRecognizing = useCallback(async () => {
     resetState();
@@ -64,7 +61,7 @@ export const useVoiceRecognition = () => {
   }, [resetState]);
 
   useEffect(() => {
-    Voice.onSpeechStart = (e) => {
+    Voice.onSpeechStart = () => {
       setState((prevState) => ({
         ...prevState,
         started: "√",
@@ -74,7 +71,7 @@ export const useVoiceRecognition = () => {
     Voice.onSpeechRecognized = () => {
       setState((prevState) => ({ ...prevState, recognized: "√" }));
     };
-    Voice.onSpeechEnd = (e) => {
+    Voice.onSpeechEnd = () => {
       setState((prevState) => ({ ...prevState, end: "√", isRecording: false }));
     };
     Voice.onSpeechError = (e) => {
@@ -105,6 +102,7 @@ export const useVoiceRecognition = () => {
 
   return {
     state,
+    setState,
     resetState,
     startRecognizing,
     stopRecognizing,
