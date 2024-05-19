@@ -1,16 +1,16 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import { View, Button, Text } from 'react-native';
-import { useVoiceControl } from '../provider/VoiceProvider';
+import { VoiceControlContext } from '../provider/VoiceProvider';
 
-export const VoiceControlComponent = () => {
+export const VoiceControlComponent = ({...props}) => {
   const { 
     isRecording, 
-    startRecognizing=(e)=>{console.log(e)}, 
-    stopRecognizing=(e)=>{console.log(e)}, 
+    startRecognizing, 
+    stopRecognizing, 
     results, 
-    speakResults 
-  } = useVoiceControl()
-
+    speakResults
+  } = useContext(VoiceControlContext)
+  
   return (
     <View style={{ padding: 20 }}>
       <Button

@@ -1,8 +1,9 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import Voice from '@react-native-voice/voice';
+import { Button } from 'react-native'
 import * as Speech from 'expo-speech';
-
-const VoiceControlContext = createContext();
+// import * as Permissions from 'expo-permissions';
+// import { Audio } from 'expo-av';
 
 const initialState = {
   recognized: '',
@@ -14,6 +15,7 @@ const initialState = {
   partialResults: [],
   isRecording: false,
 };
+export const VoiceControlContext = createContext(initialState);
 
 export const VoiceControlProvider = ({ children }) => {
   const [state, setState] = useState(initialState);
@@ -27,24 +29,17 @@ export const VoiceControlProvider = ({ children }) => {
     const onSpeechPartialResults = (e) => setState({ ...state, partialResults: e.value });
     const onSpeechVolumeChanged = (e) => setState({ ...state, pitch: e.value });
 
-    const listenerFuncs = [
-      onSpeechStart,
-      onSpeechRecognized,
-      onSpeechEnd,
-      onSpeechError,
-      onSpeechResults,
-      onSpeechPartialResults,
-      onSpeechVolumeChanged,
-    ];
-
-    const addListeners = () => listenerFuncs.forEach(Voice.onSpeech);
-    const removeListeners = () => listenerFuncs.forEach(Voice.removeAllListeners);
-
-    addListeners();
+    Voice.onSpeechStart = onSpeechStart;
+    Voice.onSpeechRecognized = onSpeechRecognized;
+    Voice.onSpeechEnd = onSpeechEnd;
+    Voice.onSpeechError = onSpeechError;
+    Voice.onSpeechResults = onSpeechResults;
+    Voice.onSpeechPartialResults = onSpeechPartialResults;
+    Voice.onSpeechVolumeChanged = onSpeechVolumeChanged;
     return () => {
-      Voice.destroy().then(removeListeners);
+      Voice.destroy().then(Voice.removeAllListeners);
     };
-  }, []);
+  }, [state]);
 
   const startRecognizing = async () => {
     try {
@@ -90,6 +85,29 @@ export const VoiceControlProvider = ({ children }) => {
     }
   };
 
+  // const GetPermissions = async () => {
+  //   try {
+  //     // const requestPermissions = async () => {
+  //     //   const { status: microphoneStatus } = await Permissions.askAsync(Permissions.AUDIO_RECORDING);
+  //     //   const { status: speechStatus } = await Permissions.askAsync(Permissions.SPEECH);
+
+  //     //   if (microphoneStatus === 'granted' && speechStatus === 'granted') {
+  //     //     alert('granted');
+  //     //   } else {
+  //     //     alert('Permissions not granted');
+  //     //   }
+  //     // };
+  //     // requestPermissions()
+
+  //     // const AudioPerm = await Audio.requestPermissionsAsync();
+  //     //     if (AudioPerm.status === 'granted') {
+  //     //       console.log('Audio Permission Granted');
+  //     //     }
+  //   } catch (err) {
+  //     console.error('Failed to get permissions', err);
+  //   }
+  // };
+
   return (
     <VoiceControlContext.Provider
       value={{
@@ -102,8 +120,9 @@ export const VoiceControlProvider = ({ children }) => {
       }}
     >
       {children}
+      {/* <Button title="Get Permissions" onPress={GetPermissions} /> */}
     </VoiceControlContext.Provider>
   );
 };
 
-export const useVoiceControl = () => useContext(VoiceControlContext);
+export const useVoice = () => useContext(VoiceControlContext)
