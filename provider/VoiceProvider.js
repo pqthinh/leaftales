@@ -1,9 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import Voice from '@react-native-voice/voice';
-import { Button } from 'react-native'
+import * as Voice from '@react-native-voice/voice';
 import * as Speech from 'expo-speech';
-// import * as Permissions from 'expo-permissions';
-// import { Audio } from 'expo-av';
 
 const initialState = {
   recognized: '',
@@ -37,22 +34,31 @@ export const VoiceControlProvider = ({ children }) => {
     Voice.onSpeechPartialResults = onSpeechPartialResults;
     Voice.onSpeechVolumeChanged = onSpeechVolumeChanged;
     return () => {
-      Voice.destroy().then(Voice.removeAllListeners);
+      Voice.onSpeechStart = undefined;
+      Voice.onSpeechRecognized = undefined;
+      Voice.onSpeechEnd = undefined;
+      Voice.onSpeechError = undefined;
+      Voice.onSpeechResults = undefined;
+      Voice.onSpeechPartialResults = undefined;
+      Voice.onSpeechVolumeChanged = undefined;
+      Voice.removeAllListeners
     };
   }, [state]);
 
   const startRecognizing = async () => {
     try {
-      await Voice.start('en-US');
+      await Voice.onSpeechStart('vi-VN');
       setState({ ...initialState, isRecording: true });
     } catch (e) {
       console.error(e);
     }
   };
 
-  const stopRecognizing = async () => {
+  const stopRecognizing = async (e) => {
     try {
-      await Voice.stop();
+      await Voice.onSpeechEnd();
+      console.log(e)
+      await Voice.onSpeechResults(e)
       setState({ ...state, isRecording: false });
     } catch (e) {
       console.error(e);
@@ -61,7 +67,7 @@ export const VoiceControlProvider = ({ children }) => {
 
   const cancelRecognizing = async () => {
     try {
-      await Voice.cancel();
+      await Voice.onSpeechEnd();
       setState({ ...state, isRecording: false });
     } catch (e) {
       console.error(e);
@@ -85,28 +91,6 @@ export const VoiceControlProvider = ({ children }) => {
     }
   };
 
-  // const GetPermissions = async () => {
-  //   try {
-  //     // const requestPermissions = async () => {
-  //     //   const { status: microphoneStatus } = await Permissions.askAsync(Permissions.AUDIO_RECORDING);
-  //     //   const { status: speechStatus } = await Permissions.askAsync(Permissions.SPEECH);
-
-  //     //   if (microphoneStatus === 'granted' && speechStatus === 'granted') {
-  //     //     alert('granted');
-  //     //   } else {
-  //     //     alert('Permissions not granted');
-  //     //   }
-  //     // };
-  //     // requestPermissions()
-
-  //     // const AudioPerm = await Audio.requestPermissionsAsync();
-  //     //     if (AudioPerm.status === 'granted') {
-  //     //       console.log('Audio Permission Granted');
-  //     //     }
-  //   } catch (err) {
-  //     console.error('Failed to get permissions', err);
-  //   }
-  // };
 
   return (
     <VoiceControlContext.Provider
@@ -120,7 +104,6 @@ export const VoiceControlProvider = ({ children }) => {
       }}
     >
       {children}
-      {/* <Button title="Get Permissions" onPress={GetPermissions} /> */}
     </VoiceControlContext.Provider>
   );
 };
