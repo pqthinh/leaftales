@@ -18,6 +18,7 @@
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/stack": "^6.3.29",
     "body-parser": "^1.20.2",
+    "busboy": "^1.6.0",
     "expo": "~51.0.8",
     "expo-av": "^14.0.5",
     "expo-localization": "~15.0.3",

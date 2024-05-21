@@ -1,32 +1,93 @@
-// Imports the Google Cloud client library
-const speech = require('@google-cloud/speech');
+const path = require('path');
+const os = require('os');
+const fs = require('fs');
 
-// Creates a client
-const client = new speech.SpeechClient();
+const Busboy = require('busboy');
+const Speech = require('@google-cloud/speech');
 
-async function quickstart() {
-  // The path to the remote LINEAR16 file
-  const gcsUri = 'gs://cloud-samples-data/speech/brooklyn_bridge.raw';
+const ENCODING = 'LINEAR16';
+const SAMPLE_RATE_HERTZ = 41000;
+const LANGUAGE = 'en-US';
 
-  // The audio file's encoding, sample rate in hertz, and BCP-47 language code
-  const audio = {
-    uri: gcsUri,
-  };
-  const config = {
-    encoding: 'LINEAR16',
-    sampleRateHertz: 16000,
-    languageCode: 'en-US',
-  };
-  const request = {
-    audio: audio,
-    config: config,
-  };
+const audioConfig = {
+    encoding: ENCODING,
+    sampleRateHertz: SAMPLE_RATE_HERTZ,
+    languageCode: LANGUAGE,
+};
 
-  // Detects speech in the audio file
-  const [response] = await client.recognize(request);
-  const transcription = response.results
-    .map(result => result.alternatives[0].transcript)
-    .join('\n');
-  console.log(`Transcription: ${transcription}`);
-}
-quickstart();
+const convertToText = (file, config) => {
+    console.log('FILE:', JSON.stringify(file));
+
+    const audio = {
+        content: fs.readFileSync(file).toString('base64'),
+    };
+
+    const request = {
+        config,
+        audio,
+    };
+
+    const speech = new Speech.SpeechClient();
+
+    return speech.recognize(request).then((response) => {
+        return response;
+    }).catch((error) => {
+        console.log('SPEECH error:', error);
+    });
+};
+
+/**
+ * Audio-to-Text is a Cloud Function that is triggered by an HTTP
+ * request. The function processes one audio file.
+ *
+ * @param {object} req Cloud Function request context.
+ * @param {object} res Cloud Function response context.
+ */
+exports.audioToText = (req, res) => {
+    if (req.method !== 'POST') {
+        res.status(405).end();
+    }
+
+    const busboy = new Busboy({ headers: req.headers });
+    const tmpdir = os.tmpdir();
+
+    let tmpFilePath;
+    let fileWritePromise;
+
+    // Process the file
+    busboy.on('file', (fieldname, file, filename) => {
+        // Note: os.tmpdir() points to an in-memory file system on GCF
+        // Thus, any files in it must fit in the instance's memory.
+        const filepath = path.join(tmpdir, filename);
+        tmpFilePath = filepath;
+
+        const writeStream = fs.createWriteStream(filepath);
+        file.pipe(writeStream);
+
+        // File was processed by Busboy; wait for it to be written to disk.
+        const promise = new Promise((resolve, reject) => {
+            file.on('end', () => {
+                writeStream.end();
+            });
+            writeStream.on('finish', resolve);
+            writeStream.on('error', reject);
+        });
+        fileWritePromise = promise;
+    });
+
+    // Triggered once the file is processed by Busboy.
+    // Need to wait for the disk writes to complete.
+    busboy.on('finish', () => {
+        fileWritePromise.then(() => {
+            convertToText(tmpFilePath, audioConfig).then((response) => {
+                const transcript = response[0].results
+                    .map(result => result.alternatives[0].transcript)
+                    .join('\n');
+                res.send({ transcript });
+            });
+            fs.unlinkSync(tmpFilePath);
+        });
+    });
+
+    busboy.end(req.rawBody);
+};

@@ -45,6 +45,7 @@ export default function App() {
       const audioBase64 = await FileSystem.readAsStringAsync(recordingUri, {
         encoding: FileSystem.EncodingType.Base64,
       });
+      console.log(audioBase64)
 
       const response = await fetch(SPEECH_TO_TEXT, {
         method: 'POST',
@@ -52,6 +53,7 @@ export default function App() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ base64Audio: audioBase64 }),
+        // body: JSON.stringify({uri: recordingUri})
       });
     //   console.log("audioBase64: ", audioBase64)
       const data = await response.json();
