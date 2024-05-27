@@ -9,7 +9,7 @@ const app = express();
 const port = 3000;
 const OPEN_AI_KEY = "sk-proj-5Y7ATm7gW5anNb8Rp0OTT3BlbkFJNq7wxMLe0cNIIBeEm6rc"
 const upload = multer({ dest: 'uploads/' });
-
+const speech2text = require('./model/speech2text')
 const client = new speech.SpeechClient();
 
 app.post('/upload', upload.single('file'), async (req, res) => {
@@ -57,6 +57,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
   }
 });
 app.get('/check', (req, res)=> res.json("ok"))
+app.post('/covert-s2t', speech2text.audioToText)
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
