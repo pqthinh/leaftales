@@ -1,8 +1,6 @@
 import React from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import BookStack from './BookStack';
-// import HomeScreen from './HomeScreen';
-// import DownloadsScreen from './DownloadsScreen';
 import SettingsScreen from '../screen/SettingsScreen';
 import RecordingAudio from '../screen/RecordingAudio';
 import VoiceTest from '../screen/VoiceTest';

@@ -1,6 +1,5 @@
 export const book_detail = {
-  cover:
-    "https://m.media-amazon.com/images/I/71SBXQhBCYL._AC_UF894,1000_QL80_.jpg",
+  cover: "https://m.media-amazon.com/images/I/71SBXQhBCYL._AC_UF894,1000_QL80_.jpg",
   title: "title book",
   description: "Day la sach",
   content: [
