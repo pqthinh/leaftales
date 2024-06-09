@@ -6,9 +6,8 @@ const BookmarkScreen = () => {
   const [bookmarkedBooks, setBookmarkedBooks] = useState([]);
 
   useEffect(() => {
-    // Load bookmarked book IDs from storage (replace with your storage mechanism)
     const loadBookmarkedBooks = async () => {
-      const storedIds = await AsyncStorage.getItem('bookmarkedBooks'); // Assuming AsyncStorage usage
+      const storedIds = await AsyncStorage.getItem('bookmarkedBooks');
       setBookmarkedBooks(storedIds ? JSON.parse(storedIds) : []);
     };
 
@@ -17,7 +16,6 @@ const BookmarkScreen = () => {
 
   const handleRemoveBookmark = (bookId) => {
     setBookmarkedBooks(bookmarkedBooks.filter(id => id !== bookId));
-    // Update storage to remove bookmark (replace with your storage mechanism)
     AsyncStorage.setItem('bookmarkedBooks', JSON.stringify(bookmarkedBooks.filter(id => id !== bookId)));
   };
 
@@ -29,7 +27,6 @@ const BookmarkScreen = () => {
           data={bookmarkedBooks}
           renderItem={({ item }) => (
             <View style={styles.bookItem}>
-              {/* Assuming you have a BookItem component to display book details */}
               <BookItem bookId={item} onRemoveBookmark={() => handleRemoveBookmark(item)} />
             </View>
           )}
