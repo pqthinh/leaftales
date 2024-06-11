@@ -11,8 +11,6 @@ export default function RecordingAudio() {
   const [audioPermission, setAudioPermission] = useState(null);
 
   useEffect(() => {
-
-    // Simply get recording permission upon first render
     async function getPermission() {
       await Audio.requestPermissionsAsync().then((permission) => {
         console.log('Permission Granted: ' + permission.granted);
@@ -22,9 +20,7 @@ export default function RecordingAudio() {
       });
     }
 
-    // Call function to get permission
     getPermission()
-    // Cleanup upon first render
     return () => {
       if (recording) {
         stopRecording();
@@ -71,14 +67,9 @@ export default function RecordingAudio() {
           from: recordingUri,
           to: FileSystem.documentDirectory + 'recordings/' + `${fileName}`
         });
-        console.log("fileName: ", fileName)
-        console.log("ủi: ", FileSystem.documentDirectory + 'recordings/' + `${fileName}`)
-        // This is for simply playing the sound back
         const playbackObject = new Audio.Sound();
         await playbackObject.loadAsync({ uri: FileSystem.documentDirectory + 'recordings/' + `${fileName}` });
         await playbackObject.playAsync();
-        console.log("recording", recording)
-        // resert our states to record again
         setRecording(null);
         setRecordingStatus('stopped');
       }

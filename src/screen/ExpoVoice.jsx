@@ -5,7 +5,7 @@ import io from 'socket.io-client';
 
 const socket = io('http://192.168.101.100:5000'); // Replace with your server's address
 
-export const VoiceControlComponent = () => {
+export default function ExpoVoice() {
     const [recording, setRecording] = useState(null);
     const [transcription, setTranscription] = useState('');
   
@@ -62,7 +62,7 @@ export const VoiceControlComponent = () => {
     };
   
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <Button title={recording ? 'Stop Recording' : 'Start Recording'} onPress={recording ? stopRecording : startRecording} />
         <Text>Transcription: {transcription}</Text>
       </View>

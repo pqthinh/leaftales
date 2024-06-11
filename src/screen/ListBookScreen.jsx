@@ -14,8 +14,6 @@ const ListBook = () => {
     const fetchBooks = async () => {
       setIsLoading(true)
       setError(null);
-      // const response = await fetch('https://your-api.com/books'); // Replace with your API endpoint
-      // const data = await response.json();
       setBooks(list_book);
     };
     try {

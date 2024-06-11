@@ -5,12 +5,14 @@ import BookReader from '../screen/BookReader';
 import SearchScreen from '../screen/SearchScreen';
 import PlaylistScreen from '../screen/PlaylistScreen';
 import BookmarkScreen from '../screen/BookmarkScreen';
+import BookComponent from '../component/Test';
 
 const Stack = createStackNavigator();
 
 const BookStack = () => {
   return (
     <Stack.Navigator>
+      <Stack.Screen name="Book" component={BookComponent} />
       <Stack.Screen name="ListBook" component={ListBook} />
       <Stack.Screen name="BookDetail" component={BookReader} />
       <Stack.Screen name="Search" component={SearchScreen} />
