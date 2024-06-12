@@ -59,6 +59,7 @@ export const bookSlice = createSlice({
       state.readingSpeed = action.payload;
     },
     setVolume: (state, action) => {
+      console.log("Volumn", action.payload)
       state.volume = action.payload;
     },
     setPitch: (state, action) => {

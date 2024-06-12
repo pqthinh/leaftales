@@ -3,7 +3,7 @@ import { View, Button, Text } from 'react-native'
 import { Audio } from 'expo-av'
 import io from 'socket.io-client'
 import { useNavigation } from '@react-navigation/native'
-
+import { handleUserCommand } from '../util/voiceCommand'
 import { SOCKET_URL } from '../util/config'
 
 const socket = io(SOCKET_URL)
@@ -15,9 +15,9 @@ export const VoiceControlComponent = () => {
   const [transcription, setTranscription] = useState('')
 
   useEffect(() => {
-    socket.on('transcription', text => {
+    socket.on('transcription', async text => {
       setTranscription(JSON.stringify(text))
-      controlNavigate()
+      await handleUserCommand(text, navigation)
     })
 
     return () => {
