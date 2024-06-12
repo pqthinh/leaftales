@@ -24,7 +24,7 @@ export const bookSlice = createSlice({
   initialState,
   reducers: {
     getBooks: (state, action) => {
-      console.log("action in slice", action.payload)
+      console.log("action in slice", action.payload.length)
       state.books = action.payload
       state.isError = false
       state.error=[]
