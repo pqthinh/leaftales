@@ -20,7 +20,7 @@ const booksData = [
   },
 ];
 
-const App = () => {
+const HomeScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>My Book List</Text>
@@ -48,4 +48,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default App;
+export default HomeScreen;

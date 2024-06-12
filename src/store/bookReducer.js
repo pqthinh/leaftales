@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
+  device_id: 1,
   books: [], // Danh sách sách trong thư viện
   currentBook: null, // Sách đang được đọc
   currentPage: 0,
@@ -14,14 +15,28 @@ const initialState = {
   bookmarks: {}, // Đánh dấu trang: { bookId: [page1, page2, ...] }
   notes: {}, // Ghi chú: { bookId: { word: definition } }
   playlist: [],
+  isError: false,
+  error: []
 };
 
 const bookSlice = createSlice({
-  name: 'books',
+  name: 'book',
   initialState,
   reducers: {
-    addBook: (state, action) => {
-      state.books.push(action.payload);
+    getBooks: (state, action) => {
+      console.log("action in slice", action)
+      state.books = action.payload
+      state.isError = false
+      state.error=[]
+    },
+    setError: (state, action) => {
+      state.isError= true
+      state.error = action.payload
+    },
+    getBook: (state, action) => {
+      state.currentBook = action.book;
+      state.currentPage = action.currentPage||0;
+      state.currentChapter = action.currentChapter||1;
     },
     updateBook: (state, action) => {
       const index = state.books.findIndex(book => book.id === action.payload.id);
@@ -35,7 +50,7 @@ const bookSlice = createSlice({
     setCurrentBook: (state, action) => {
       state.currentBook = action.payload;
       state.currentPage = 0;
-      state.currentChapter = 0;
+      state.currentChapter = 1;
     },
     setReadingStatus: (state, action) => {
       state.isReading = action.payload;
@@ -89,7 +104,9 @@ const bookSlice = createSlice({
 });
 
 export const {
-  addBook,
+  getBooks,
+  setError,
+  getBook,
   updateBook,
   deleteBook,
   setCurrentBook,

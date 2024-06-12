@@ -16,7 +16,11 @@ import { View, Text, TextInput, Button, FlatList } from 'react-native'
 
 const BookComponent = () => {
   const dispatch = useDispatch()
-  const books = useSelector(state => state.books.books)
+  const books = useSelector(state => {
+    console.log(state)
+    state.books
+  })
+  console.log(books)
   const [newBook, setNewBook] = useState({
     id: Date.now().toString(),
     title: '',
