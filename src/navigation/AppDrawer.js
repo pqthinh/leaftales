@@ -10,12 +10,13 @@ const Drawer = createDrawerNavigator();
 const AppDrawer = () => {
   return (
     <Drawer.Navigator>
-      <Drawer.Screen name="Home" component={BookStack} options={{ headerShown: false }}/>
-      <Drawer.Screen name="Downloads" component={RecordingAudio} options={{ headerShown: false }}/>
-      <Drawer.Screen name="Expo voice" component={ExpoVoice} options={{ headerShown: false }}/>
-      <Drawer.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }}/>
+      <Drawer.Screen name="Home" component={BookStack}/>
+      <Drawer.Screen name="Downloads" component={RecordingAudio}/>
+      <Drawer.Screen name="Expo voice" component={ExpoVoice}/>
+      <Drawer.Screen name="Settings" component={SettingsScreen}/>
     </Drawer.Navigator>
   );
 };
+// options={{ headerShown: false }}
 
 export default AppDrawer;
