@@ -19,7 +19,7 @@ import {
   sortBooks
 } from '../store/bookReducer'
 import store from '../store/store.js'
-
+import speakResult from '../util/speakResult.js'
 const { dispatch } = store
 
 export const getBooksApi = async params => {
@@ -33,8 +33,8 @@ export const getBooksApi = async params => {
     }
     const data = await axios.post('/api/v1/book_info', params)
     if (data && data.data) {
-      const books = []
-      data.data.forEach(bookData => {
+      const books = [], speakBook = []
+      data.data.forEach((bookData, index) => {
         const { author, category, book } = bookData
         const newBookInfo = {
           id: book.BookId,
@@ -53,8 +53,10 @@ export const getBooksApi = async params => {
           }
         }
         books.push(newBookInfo)
+        speakBook.push(`${index+1} - Sách ${book.BookName} của tác giả ${author.AuthorName} \n `)
       })
       dispatch(getBooks(books))
+      speakResult(speakBook.join(speakBook))
     } else {
       dispatch(setError(data.error))
     }
