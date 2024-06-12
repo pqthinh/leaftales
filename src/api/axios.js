@@ -1,7 +1,8 @@
 import axios from 'axios'
+import {BACKEND_URL} from '../util/config'
 
 const instance = axios.create({
-  baseURL: 'https://wemarket-api.herokuapp.com/api'
+  baseURL: BACKEND_URL
 })
 
 export default instance

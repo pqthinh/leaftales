@@ -1,15 +1,19 @@
 import { configureStore } from '@reduxjs/toolkit';
-// import { combineReducers } from 'redux';
-import bookReducer from './bookReducer';
+import { persistStore, persistReducer } from 'redux-persist';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import thunk from 'redux-thunk'; // Import thunk nếu bạn vẫn sử dụng nó
+import bookReducer from './bookReducer'; // Đảm bảo đường dẫn đến bookReducer của bạn
 
-// const rootReducer = combineReducers({
-//     book: bookReducer,
-// });
+const persistConfig = {
+  key: '@root',
+  storage: AsyncStorage
+};
 
-const store = configureStore({
-    reducer: {
-        bookReducer
-    }
+const persistedReducer = persistReducer(persistConfig, bookReducer);
+
+export const store = configureStore({
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(thunk)
 });
 
-export default store;
+export const persistor = persistStore(store);

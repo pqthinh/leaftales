@@ -12,7 +12,7 @@ const Stack = createStackNavigator();
 const BookStack = () => {
   return (
     <Stack.Navigator headerShown="none">
-      <Stack.Screen name="Book" component={HomeScreen} />
+      <Stack.Screen name="Book" component={HomeScreen} options={{ headerShown: false }}/>
       <Stack.Screen name="ListBook" component={ListBook} />
       <Stack.Screen name="BookDetail" component={BookReader} />
       <Stack.Screen name="Search" component={SearchScreen} />

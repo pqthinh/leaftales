@@ -1,4 +1,4 @@
-import axios from './axios'
+import axios from './axios.js'
 import {
   getBooks,
   setError,
@@ -19,7 +19,7 @@ import {
   sortBooks
 } from '../store/bookReducer'
 
-export const getBooksApi = (params = async dispatch => {
+export const getBooksApi = (params) = async dispatch => {
   try {
     const params = {
       device_id: '1',
@@ -28,7 +28,7 @@ export const getBooksApi = (params = async dispatch => {
       book_name: '',
       offset_limit: 10
     }
-    const data = await axios('/api/v1/book_info', params)
+    const data = await axios.post('/api/v1/book_info', params)
     if (data && data.data) {
       console.log(data.data)
       dispatch(getBooks(data.data))
@@ -37,19 +37,19 @@ export const getBooksApi = (params = async dispatch => {
       dispatch(setError(data.error))
     }
   } catch (error) {
-    console.log(error)
+    console.log(error.message)
     dispatch(setError(data.message))
   }
-})
+}
 
-export const getBookDetail = (params = async dispatch => {
+export const getBookDetail = (params) = async dispatch => {
   try {
     const params = {
       device_id: '1',
       book_id: '1',
       chapter_id: '1'
     }
-    const data = await axios('/api/v1/book', params)
+    const data = await axios.post('/api/v1/book', params)
     if (data && data.data) {
       dispatch(getBooks(data.data))
     } else {
@@ -59,4 +59,4 @@ export const getBookDetail = (params = async dispatch => {
     console.log(error)
     dispatch(setError(data.message))
   }
-})
+}
