@@ -2,29 +2,29 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   device_id: 1,
-  books: [], // Danh sách sách trong thư viện
-  currentBook: null, // Sách đang được đọc
+  books: [],
+  currentBook: null,
   currentPage: 0,
   currentChapter: 0,
   isReading: false,
-  readingSpeed: 1.0, // Tốc độ đọc
-  volume: 1.0, // Âm lượng
-  pitch: 1.0, // Ngữ điệu
-  recognizedText: '', // Văn bản từ nhận diện giọng nói
-  action: {}, // action phân tích từ recognizedText dùng để điều hướng hoặc tìm kiếm call api ...
-  bookmarks: {}, // Đánh dấu trang: { bookId: [page1, page2, ...] }
-  notes: {}, // Ghi chú: { bookId: { word: definition } }
+  readingSpeed: 1.0,
+  volume: 1.0,
+  pitch: 1.0,
+  recognizedText: '',
+  action: {},
+  bookmarks: {},
+  notes: {},
   playlist: [],
   isError: false,
   error: []
 };
 
-const bookSlice = createSlice({
+export const bookSlice = createSlice({
   name: 'book',
   initialState,
   reducers: {
     getBooks: (state, action) => {
-      console.log("action in slice", action)
+      console.log("action in slice", action.payload)
       state.books = action.payload
       state.isError = false
       state.error=[]

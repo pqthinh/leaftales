@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 
-const BookItem = ({ title, author, imageUrl }) => (
+const BookItem = ({ name, author, coverImage }) => (
   <View style={styles.bookItem}>
-    <Image source={{ uri: imageUrl }} style={styles.bookImage} />
+    <Image source={{ uri: coverImage }} style={styles.bookImage} />
     <View style={styles.bookInfo}>
-      <Text style={styles.bookTitle}>{title}</Text>
+      <Text style={styles.bookTitle}>{name}</Text>
       <Text style={styles.bookAuthor}>{author}</Text>
     </View>
   </View>

@@ -18,8 +18,11 @@ import {
   searchBooks,
   sortBooks
 } from '../store/bookReducer'
+import store from '../store/store.js'
 
-export const getBooksApi = (params) = async dispatch => {
+const { dispatch } = store
+
+export const getBooksApi = async params => {
   try {
     const params = {
       device_id: '1',
@@ -30,10 +33,29 @@ export const getBooksApi = (params) = async dispatch => {
     }
     const data = await axios.post('/api/v1/book_info', params)
     if (data && data.data) {
-      console.log(data.data)
-      dispatch(getBooks(data.data))
+      const books = []
+      data.data.forEach(bookData => {
+        const { author, category, book } = bookData
+        const newBookInfo = {
+          id: book.BookId,
+          name: book.BookName,
+          coverImage: book.CoverImage,
+          description: book.BookDescription,
+          chapters: book.BookChapterName,
+          author: {
+            id: author.AuthorId,
+            name: author.AuthorName,
+            description: author.AuthorDescr
+          },
+          category: {
+            id: category.CategoryID,
+            name: category.CategoryName
+          }
+        }
+        books.push(newBookInfo)
+      })
+      dispatch(getBooks(books))
     } else {
-      console.log(data)
       dispatch(setError(data.error))
     }
   } catch (error) {
@@ -42,7 +64,7 @@ export const getBooksApi = (params) = async dispatch => {
   }
 }
 
-export const getBookDetail = (params) = async dispatch => {
+export const getBookDetail = async params => {
   try {
     const params = {
       device_id: '1',

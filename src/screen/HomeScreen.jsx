@@ -2,45 +2,32 @@ import React, { useEffect, useState } from 'react'
 import { View, Text, FlatList, StyleSheet } from 'react-native'
 import BookItem from '../component/BookItem'
 import { getBooksApi } from '../api/book'
-import { useSelector, useDispatch  } from 'react-redux'
-
-// const booksData = [
-//   {
-//     title: 'The Hitchhiker\'s Guide to the Galaxy',
-//     author: 'Douglas Adams',
-//     imageUrl: 'https://example.com/book1.jpg',
-//   },
-//   {
-//     title: 'Pride and Prejudice',
-//     author: 'Jane Austen',
-//     imageUrl: 'https://example.com/book2.jpg',
-//   },
-//   {
-//     title: 'To Kill a Mockingbird',
-//     author: 'Harper Lee',
-//     imageUrl: 'https://example.com/book3.jpg',
-//   },
-// ];
+import { useSelector } from 'react-redux'
 
 const HomeScreen = () => {
-  const [booksData, setBooksData] = useState(
-    useSelector(state => {
-      console.log(state.books)
-      return state.books
-    })
-  )
-  // const booksData = useSelector((state) => state.books);
-  const dispatch = useDispatch();
+  const [booksData, setBooksData] = useState(useSelector(state => state.books))
 
   useEffect(() => {
-    getBooksApi()
-  }, [booksData])
+    async function fetch() {
+      await getBooksApi()
+      const books = useSelector(state => state.books)
+      setBooksData(books)
+    }
+    fetch()
+  }, [])
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>My Book List</Text>
       <FlatList
         data={booksData}
-        renderItem={({ item }) => <BookItem {...item} />}
+        renderItem={({ item }) => (
+          <BookItem
+            name={item.name}
+            author={item.author.name}
+            coverImage={item.coverImage}
+            key={item.id}
+          />
+        )}
         keyExtractor={item => item.title}
         contentContainerStyle={styles.flatListContent}
       />
