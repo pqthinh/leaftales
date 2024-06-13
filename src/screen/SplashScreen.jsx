@@ -21,7 +21,7 @@ function SplashScreen() {
 
     const timer = setTimeout(() => {
       navigation.navigate('UserInfoScreen')
-    }, 3000)
+    }, 5000)
 
     return () => clearTimeout(timer)
   }, [navigation])
@@ -33,7 +33,9 @@ function SplashScreen() {
           source={require('../assets/img/splash.jpg')} // Đường dẫn tới icon ứng dụng
           style={styles.logo}
         />
-        <Text style={styles.appName}>Ứng dụng hỗ trợ người khiếm thị đọc sách</Text>
+        <Text style={styles.appName}>
+          Ứng dụng hỗ trợ người khiếm thị đọc sách
+        </Text>
       </Animated.View>
     </View>
   )
@@ -47,9 +49,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   logo: {
-    width: 150,
+    width: '90%',
     height: 150,
-    marginBottom: 20
+    marginBottom: 20,
+    flex: 1,
+    justifyContent: 'center'
   },
   appName: {
     fontSize: 24,
