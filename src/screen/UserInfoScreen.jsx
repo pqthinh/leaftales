@@ -1,9 +1,16 @@
-import React, { useState, useEffect } from 'react'
-import { StyleSheet, View, Text, Button, ActivityIndicator } from 'react-native'
+import React, { useState, useEffect, useRef } from 'react'
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator
+} from 'react-native'
 import * as Speech from 'expo-speech'
 import { Audio } from 'expo-av'
 import io from 'socket.io-client'
 import { SOCKET_URL } from '../util/config'
+import Icon from 'react-native-vector-icons/Ionicons'
 
 const socket = io(SOCKET_URL)
 
@@ -20,20 +27,25 @@ const questions = [
 const UserInfoScreen = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState({})
-  const [recording, setRecording] = useState(null)
+  const recording = useRef(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
+  const [isMicActive, setIsMicActive] = useState(false)
+  // const [isAskingQuestion, setIsAskingQuestion] = useState(false);
 
   useEffect(() => {
-    askQuestion()
-    // socket.on('transcription', async (text) => {
-    //   await handleSpeechResult(text);
-    // });
+    setTimeout(askQuestion, 500)
+    socket.on('transcription', handleSpeechResult)
 
     return () => {
       socket.off('transcription')
     }
-  }, [])
+  }, [currentQuestionIndex])
+
+  const askQuestion = () => {
+    const question = questions[currentQuestionIndex]
+    Speech.speak(question, { language: 'vi' })
+  }
 
   const startRecording = async () => {
     try {
@@ -49,106 +61,79 @@ const UserInfoScreen = () => {
         require('../assets/sound/bubble-pop-up-alert-notification.wav')
       )
       await alertSound.playAsync()
+
+      setIsMicActive(true)
       setIsRecording(true)
-      const recording = new Audio.Recording()
-      await recording.prepareToRecordAsync(
+      recording.current = new Audio.Recording()
+      await recording.current.prepareToRecordAsync(
         Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
       )
-      await recording.startAsync()
-      setRecording(recording)
+      await recording.current.startAsync()
     } catch (err) {
       console.error('Failed to start recording', err)
-      throw err
     }
   }
 
   const stopRecording = async () => {
     try {
+      const { sound: alertSound } = await Audio.Sound.createAsync(
+        require('../assets/sound/bubble-pop-up-alert-notification.wav')
+      )
+      await alertSound.playAsync()
+
       setIsRecording(false)
-      await recording.stopAndUnloadAsync()
-      const uri = recording.getURI()
+      setIsMicActive(false) // Tắt hiệu ứng micro
+      await recording.current.stopAndUnloadAsync()
+      const uri = recording.current.getURI()
       const audioData = await fetch(uri)
       const blob = await audioData.blob()
       const reader = new FileReader()
-
-      return new Promise((resolve, reject) => {
-        reader.readAsDataURL(blob)
-        reader.onloadend = () => {
-          const base64data = reader.result
-          socket.emit('audio-stream', { uri: base64data })
-          socket.on('transcription', text => {
-            resolve(text)
-          })
-          socket.on('error', error => {
-            reject(error)
-          })
-        }
-        reader.onerror = error => {
-          reject(error)
-        }
-      })
+      reader.readAsDataURL(blob)
+      reader.onloadend = () => {
+        const base64data = reader.result
+        socket.emit('audio-stream', { uri: base64data })
+      }
     } catch (err) {
       console.error('Failed to stop recording', err)
-      throw err
     }
   }
 
-  const askQuestion = () => {
-    const question = questions[currentQuestionIndex]
-    Speech.speak(question, { language: 'vi' })
-  }
-
-  const handleSpeechResult = async text => {
+  const handleSpeechResult = text => {
+    console.log(text)
     setIsLoading(true)
-    try {
-      setAnswers(prevAnswers => ({
-        ...prevAnswers,
-        [currentQuestionIndex]: text
-      }))
 
-      if (currentQuestionIndex < questions.length - 1) {
-        setCurrentQuestionIndex(currentQuestionIndex + 1)
-      } else {
-        console.log('Thông tin người dùng:', answers)
-        Speech.speak('Cảm ơn bạn đã cung cấp thông tin.', { language: 'vi' })
-      }
-    } catch (error) {
-      console.error('Lỗi khi chuyển đổi giọng nói:', error)
-      Speech.speak('Xin lỗi, có lỗi xảy ra. Vui lòng thử lại.', {
-        language: 'vi'
-      })
-    } finally {
-      setIsLoading(false)
-      askQuestion()
-    }
-  }
+    setAnswers(prevAnswers => ({
+      ...prevAnswers,
+      [currentQuestionIndex]: text
+    }))
 
-  const handleStopRecording = async () => {
-    if (recording) {
-      try {
-        const text = await stopRecording()
-        console.log('handleStopRecording', text)
-        await handleSpeechResult(text)
-        setRecording(null)
-      } catch (err) {
-        console.error('Failed to stop recording', err)
-      }
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1)
+      // setIsAskingQuestion(true);
+      // setTimeout(askQuestion, 500)
+    } else {
+      console.log('Thông tin người dùng:', answers)
+      Speech.speak('Cảm ơn bạn đã cung cấp thông tin.', { language: 'vi' })
     }
+
+    setIsLoading(false)
   }
 
   return (
     <View style={styles.container}>
       <Text style={styles.question}>{questions[currentQuestionIndex]}</Text>
       {isLoading && <ActivityIndicator size='large' color='#0000ff' />}
-      <View style={styles.containerButtonMic}>
-        <Button
-          title={isRecording ? 'Stop Recording' : 'Start Recording'}
-          onPress={async () =>
-            isRecording ? await handleStopRecording() : await startRecording()
-          }
-          color='#6200EE'
+
+      <TouchableOpacity
+        onPress={isRecording ? stopRecording : startRecording}
+        style={styles.micButton}
+      >
+        <Icon
+          name={isMicActive ? 'mic-circle' : 'mic-circle-outline'}
+          size={80}
+          color={isMicActive ? 'red' : 'black'}
         />
-      </View>
+      </TouchableOpacity>
     </View>
   )
 }
@@ -162,18 +147,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5'
   },
   question: {
-    fontSize: 18,
+    fontSize: 24, // Tăng kích thước chữ cho dễ đọc
     textAlign: 'center',
     marginBottom: 20,
-    color: '#333'
+    color: '#333',
+    fontWeight: 'bold' // Làm chữ đậm hơn
   },
-  containerButtonMic: {
-    position: 'absolute',
-    bottom: 30,
-    left: 0,
-    right: 0,
+  micButton: {
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'center'
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#f0f0f0',
+    position: 'absolute',
+    bottom: 30
   }
 })
 

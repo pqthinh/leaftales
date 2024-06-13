@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react'
-import { StyleSheet, View, Text, Image, Animated } from 'react-native'
+import React, { useEffect, useRef } from 'react'
+import { Animated, ImageBackground, StyleSheet, Text, View } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import * as Speech from 'expo-speech'
 
 function SplashScreen() {
   const navigation = useNavigation()
-  const fadeAnim = new Animated.Value(0)
+  const fadeAnim = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -13,7 +13,9 @@ function SplashScreen() {
       duration: 1000,
       useNativeDriver: true
     }).start()
+  }, [fadeAnim])
 
+  useEffect(() => {
     Speech.speak(
       'Chào mừng bạn đến với ứng dụng đọc sách dành cho người khiếm thị.',
       { language: 'vi' }
@@ -28,36 +30,43 @@ function SplashScreen() {
 
   return (
     <View style={styles.container}>
-      <Animated.View style={{ opacity: fadeAnim }}>
-        <Image
-          source={require('../assets/img/splash.jpg')} // Đường dẫn tới icon ứng dụng
-          style={styles.logo}
-        />
-        <Text style={styles.appName}>
-          Ứng dụng hỗ trợ người khiếm thị đọc sách
-        </Text>
-      </Animated.View>
+      <ImageBackground
+        source={require('../assets/img/splash.jpg')} // Đường dẫn tới ảnh nền
+        style={styles.backgroundImage}
+        resizeMode='stretch'
+      >
+        <Animated.View style={{ opacity: fadeAnim }}>
+          <View style={styles.content}>
+            <Text style={styles.appName}>
+              Ứng dụng hỗ trợ người khiếm thị đọc sách
+            </Text>
+          </View>
+        </Animated.View>
+      </ImageBackground>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center'
+    flex: 1
   },
-  logo: {
-    width: '90%',
-    height: 150,
-    marginBottom: 20,
+  backgroundImage: {
     flex: 1,
-    justifyContent: 'center'
+    resizeMode: 'stretch',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  content: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)', // Nền mờ cho chữ nổi bật
+    padding: 20,
+    borderRadius: 10
   },
   appName: {
     fontSize: 24,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    color: '#333'
   }
 })
 

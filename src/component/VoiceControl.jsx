@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { View, Button, Text } from 'react-native'
+import { View, TouchableOpacity, Text, StyleSheet } from 'react-native'
 import { Audio } from 'expo-av'
 import io from 'socket.io-client'
 import { useNavigation } from '@react-navigation/native'
+import Icon from 'react-native-vector-icons/Ionicons'
 import { handleUserCommand } from '../util/voiceCommand'
 import { SOCKET_URL } from '../util/config'
 
@@ -78,17 +79,49 @@ export const VoiceControlComponent = () => {
 
   const controlNavigate = () => {
     // navigation.navigate("BookDetail", { recordingName: 'Ghi âm mới' })
-    navigation.navigate("PlayList", { recordingName: 'Ghi âm mới' })
-    
+    navigation.navigate('PlayList', { recordingName: 'Ghi âm mới' })
   }
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Button
-        title={recording ? 'Stop Recording' : 'Start Recording'}
+      <TouchableOpacity
         onPress={recording ? stopRecording : startRecording}
-      />
+        style={styles.micButton}
+      >
+        <Icon
+          name={isMicActive ? 'mic-circle' : 'mic-circle-outline'}
+          size={80}
+          color={isMicActive ? 'red' : 'black'}
+        />
+      </TouchableOpacity>
       <Text>Transcription: {transcription}</Text>
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#f5f5f5'
+  },
+  question: {
+    fontSize: 24, // Tăng kích thước chữ cho dễ đọc
+    textAlign: 'center',
+    marginBottom: 20,
+    color: '#333',
+    fontWeight: 'bold' // Làm chữ đậm hơn
+  },
+  micButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#f0f0f0',
+    position: 'absolute',
+    bottom: 30
+  }
+})
