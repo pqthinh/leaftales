@@ -16,7 +16,9 @@ const initialState = {
   notes: {},
   playlist: [],
   isError: false,
-  error: []
+  error: [],
+  language: "vi",
+  userInfo: {}
 };
 
 export const bookSlice = createSlice({

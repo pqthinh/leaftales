@@ -10,7 +10,6 @@ const socket = io(SOCKET_URL)
 
 export const VoiceControlComponent = () => {
   const navigation = useNavigation()
-
   const [recording, setRecording] = useState(null)
   const [transcription, setTranscription] = useState('')
 
