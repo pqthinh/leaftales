@@ -11,29 +11,42 @@ import { Audio } from 'expo-av'
 import io from 'socket.io-client'
 import { SOCKET_URL } from '../util/config'
 import Icon from 'react-native-vector-icons/Ionicons'
+import useCache from '../hooks/useCache'
+import { useFocusEffect, useNavigation } from '@react-navigation/native'
 
 const socket = io(SOCKET_URL)
 
 const questions = [
-  'Xin chào, bạn tên là gì?',
-  'Bạn bao nhiêu tuổi?',
-  'Bạn là nam hay nữ?',
-  'Sở thích của bạn là gì?',
-  'Thói quen của bạn là gì?',
-  'Bạn thích đọc thể loại sách nào?',
-  'Bạn thường có thời gian rảnh vào lúc nào?'
-]
+    'Xin chào, bạn tên là gì?'
+    // 'Bạn bao nhiêu tuổi?',
+    // 'Bạn là nam hay nữ?',
+    // 'Sở thích của bạn là gì?',
+    // 'Thói quen của bạn là gì?',
+    // 'Bạn thích đọc thể loại sách nào?',
+    // 'Bạn thường có thời gian rảnh vào lúc nào?'
+  ],
+  keys = [
+    'name'
+    // 'age',
+    // 'gender',
+    // 'hobbies',
+    // 'routine',
+    // 'kind_of_book',
+    // 'free_at'
+  ]
 
 const UserInfoScreen = () => {
+  const { set, get } = useCache
+  const navigation = useNavigation()
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState({})
   const recording = useRef(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
   const [isMicActive, setIsMicActive] = useState(false)
-  // const [isAskingQuestion, setIsAskingQuestion] = useState(false);
 
   useEffect(() => {
+    if (currentQuestionIndex > questions.length - 1) return
     setTimeout(askQuestion, 500)
     socket.on('transcription', handleSpeechResult)
 
@@ -41,6 +54,12 @@ const UserInfoScreen = () => {
       socket.off('transcription')
     }
   }, [currentQuestionIndex])
+
+  useFocusEffect(
+    React.useCallback(() => {
+      Speech.stop()
+    }, [])
+  )
 
   const askQuestion = () => {
     const question = questions[currentQuestionIndex]
@@ -104,25 +123,36 @@ const UserInfoScreen = () => {
 
     setAnswers(prevAnswers => ({
       ...prevAnswers,
-      [currentQuestionIndex]: text
+      [keys[currentQuestionIndex]]: text
     }))
-
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1)
-      // setIsAskingQuestion(true);
-      // setTimeout(askQuestion, 500)
-    } else {
-      console.log('Thông tin người dùng:', answers)
-      Speech.speak('Cảm ơn bạn đã cung cấp thông tin.', { language: 'vi' })
-    }
+    setCurrentQuestionIndex(currentQuestionIndex + 1)
+    console.log('Thông tin người dùng:', answers)
+    Speech.speak(
+      'Cảm ơn bạn đã cung cấp thông tin.\n Hệ thống sẽ đề xuất một số cuốn sách phù hợp với bạn.\n Xin vui lòng chờ trong giây lát!',
+      { language: 'vi' }
+    )
+    setTimeout(async () => {
+      console.log(answers)
+      await set('@app/get_user_info', {
+        name: 'ThinhPQ10',
+        age: 24,
+        gender: 'Nam',
+        ...answers
+      })
+      navigation.navigate('HomeStack')
+    }, 10000)
 
     setIsLoading(false)
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.question}>{questions[currentQuestionIndex]}</Text>
-      {isLoading && <ActivityIndicator size='large' color='#0000ff' />}
+      {currentQuestionIndex < questions.length && (
+        <Text style={styles.question}>{questions[currentQuestionIndex]}</Text>
+      )}
+      {(isLoading || currentQuestionIndex == questions.length) && (
+        <ActivityIndicator size='large' color='#0000ff' />
+      )}
 
       <TouchableOpacity
         onPress={isRecording ? stopRecording : startRecording}

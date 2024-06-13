@@ -3,8 +3,10 @@ import { View, Text, FlatList, StyleSheet } from 'react-native'
 import BookItem from '../component/BookItem'
 import { getBooksApi } from '../api/book'
 import { useSelector } from 'react-redux'
+import { useNavigation } from '@react-navigation/native'
 
 const HomeScreen = () => {
+  const navigation = useNavigation()
   const [booksData, setBooksData] = useState(useSelector(state => state.books))
 
   useEffect(() => {
@@ -15,17 +17,22 @@ const HomeScreen = () => {
     }
     fetch()
   }, [])
+  const onBookPress = (id) => {
+    const bookDetail = booksData[id]
+    navigation.navigate("BookDetail", {...bookDetail})
+  }
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>My Book List</Text>
+      <Text style={styles.heading}>Đề xuất dành cho bạn:</Text>
       <FlatList
         data={booksData}
-        renderItem={({ item }) => (
+        renderItem={({ item }, i) => (
           <BookItem
             name={item.name}
             author={item.author.name}
             coverImage={item.coverImage}
-            key={item.id}
+            onBookPress={()=>onBookPress(i)}
+            key={i}
           />
         )}
         keyExtractor={item => item.title}

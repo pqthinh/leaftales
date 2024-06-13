@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { NavigationContainer } from '@react-navigation/native'
 import AppDrawer from './src/navigation/AppDrawer'
 import { VoiceControlComponent } from './src/component/VoiceControl'
@@ -12,12 +12,22 @@ LogBox.ignoreAllLogs()
 
 export default function App() {
   const { set, get } = useCache
-  const userInfo = get('@app/get_user_info')
+
+  const [userInfo, setUserInfo] = useState()
+  useEffect(() => {
+    async function getInfo() {
+      const info = await get('@app/get_user_info')
+      console.log('user info', info)
+      setUserInfo(info)
+    }
+    getInfo()
+  }, [])
+
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <NavigationContainer>
-          {userInfo && userInfo.name ? (
+          {userInfo ? (
             <>
               <AppDrawer />
               <View style={{ height: 80 }}>

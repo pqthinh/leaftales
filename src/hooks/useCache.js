@@ -13,7 +13,7 @@ export default {
       }
 
       const json = JSON.stringify(dx)
-
+      console.log("data cache: ====> ", json)
       AsyncStorage.setItem(key, json)
     } catch (error) {
       console.log('STORAGE SET]Error->', error)

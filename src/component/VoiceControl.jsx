@@ -13,6 +13,7 @@ export const VoiceControlComponent = () => {
   const navigation = useNavigation()
   const [recording, setRecording] = useState(null)
   const [transcription, setTranscription] = useState('')
+  const [isMicActive, setIsMicActive] = useState(false)
 
   useEffect(() => {
     socket.on('transcription', async text => {
@@ -38,7 +39,7 @@ export const VoiceControlComponent = () => {
         require('../assets/sound/bubble-pop-up-alert-notification.wav') // Đường dẫn tới file âm thanh
       )
       await alertSound.playAsync()
-
+      setIsMicActive(true)
       const recording = new Audio.Recording()
       await recording.prepareToRecordAsync(
         Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
@@ -70,7 +71,7 @@ export const VoiceControlComponent = () => {
         socket.emit('audio-stream', { uri: base64data })
         //   socket.emit('audio-stream-end', {});
       }
-
+      setIsMicActive(false)
       setRecording(null)
     } catch (err) {
       console.error('Failed to stop recording', err)
