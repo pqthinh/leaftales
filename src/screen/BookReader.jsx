@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   View,
   Text,
@@ -8,64 +8,55 @@ import {
   ActivityIndicator,
   ScrollView
 } from 'react-native'
-import * as Speech from 'expo-speech'
+import Icon from 'react-native-vector-icons/Ionicons'
 import { getBookDetail } from '../api/book'
-// import { useSelector } from 'react-redux'
 import useBookReader from '../hooks/useBookReader'
-import { Button } from 'react-native-paper'
 
 const BookReaderScreen = ({ route }) => {
   const book = route.params
   const [currentChapterIndex, setCurrentChapterIndex] = useState(1)
-  const [chapterContent, setChapterContent] = useState('')
+  const [bookChapterContent, setBookChapterContent] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [showFullDescription, setShowFullDescription] = useState(false)
-  const [bookReader, setBookReader] = useState(useBookReader(chapterContent))
 
   useEffect(() => {
-    async function fetch() {
-      const params = {
-        device_id: '1',
-        book_id: `${book.id}`,
-        chapter_id: `${currentChapterIndex}`
+    const fetchChapterContent = async () => {
+      try {
+        const params = {
+          device_id: '1',
+          book_id: `${book.id}`,
+          chapter_id: `${currentChapterIndex}`
+        }
+        const res = await getBookDetail(params)
+        setBookChapterContent(res.content)
+        setIsLoading(false)
+      } catch (error) {
+        console.error('Error fetching chapter content:', error)
+        // Xử lý lỗi (ví dụ: hiển thị thông báo lỗi)
       }
-      const res = await getBookDetail(params)
-      // const chapterContent = useSelector(state => {
-      //   console.log(state)
-      //   return state.chapterContent
-      // })
-      setChapterContent(res.content)
-      setIsLoading(false)
     }
-    fetch()
-  }, [currentChapterIndex])
-  useEffect(() => {
-    const hookRead = useBookReader(chapterContent)
-    setBookReader(hookRead)
-    // {
-    //   sentences,
-    //   currentSentenceIndex,
-    //   playbackState,
-    //   speechRate,
-    //   volume,
-    //   speakNextSentence,
-    //   speakPreviousSentence,
-    //   pauseSpeech,
-    //   resumeSpeech,
-    //   stopSpeech,
-    //   adjustSpeed,
-    //   adjustVolume,
-    //   goToSentence,
-    //   getProgressPercentage,
-    // }
-  }, [bookReader, chapterContent])
 
+    fetchChapterContent()
+  }, [currentChapterIndex])
+
+  const {
+    sentences,
+    currentSentenceIndex,
+    playbackState,
+    speechRate,
+    volume,
+    speakNextSentence,
+    speakPreviousSentence,
+    pauseSpeech,
+    resumeSpeech,
+    stopSpeech,
+    adjustSpeed,
+    adjustVolume,
+    goToSentence,
+    getProgressPercentage
+  } = useBookReader(bookChapterContent)
   const toggleDescription = () => {
     setShowFullDescription(!showFullDescription)
-  }
-
-  const handleSpeak = () => {
-    Speech.speak(chapterContent, { language: 'vi' })
   }
 
   const handleNextChapter = () => {
@@ -107,75 +98,97 @@ const BookReaderScreen = ({ route }) => {
       {isLoading ? (
         <ActivityIndicator size='large' style={styles.loadingIndicator} />
       ) : (
-        <ScrollView style={styles.content}>
-          {/* <Text style={styles.chapterContent}>{chapterContent}</Text> */}
-          {bookReader.sentences.map((sentence, index) => (
-            <Text
-              key={index}
-              style={[
-                styles.chapterContent,
-                index === bookReader.currentSentenceIndex &&
-                  styles.currentSentence
-              ]}
+        <View style={styles.content}>
+          <ScrollView style={styles.content}>
+            {sentences.map((sentence, index) => (
+              <Text
+                key={index}
+                style={[
+                  styles.chapterContent,
+                  index === currentSentenceIndex && styles.currentSentence
+                ]}
+              >
+                {sentence}
+              </Text>
+            ))}
+          </ScrollView>
+          <Text style={styles.progress}>
+            Tiến độ: {getProgressPercentage()}%
+          </Text>
+          <View style={styles.controls}>
+            <TouchableOpacity
+              onPress={speakPreviousSentence}
+              style={styles.controlButton}
             >
-              {sentence}
-            </Text>
-          ))}
-        </ScrollView>
+              <Icon name='play-back' size={30} color='black' />
+            </TouchableOpacity>
+            {playbackState === 'playing' ? (
+              <TouchableOpacity
+                onPress={pauseSpeech}
+                style={styles.controlButton}
+              >
+                <Icon name='pause' size={30} color='black' />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                onPress={speakNextSentence}
+                style={styles.controlButton}
+              >
+                <Icon name='play' size={30} color='black' />
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              onPress={speakNextSentence}
+              style={styles.controlButton}
+            >
+              <Icon name='play-forward' size={30} color='black' />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => adjustVolume(volume + 0.1)}
+              style={styles.controlButton}
+            >
+              <Icon name='volume-high' size={30} color='black' />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => adjustVolume(Math.max(0, volume - 0.1))}
+              style={styles.controlButton}
+            >
+              <Icon name='volume-low' size={30} color='black' />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.controls}>
+            <TouchableOpacity
+              onPress={() => adjustSpeed(Math.max(0.5, speechRate - 0.1))}
+              style={styles.controlButton}
+            >
+              <Icon name='walk' size={30} color='black' />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => adjustSpeed(1.0)}
+              style={styles.controlButton}
+            >
+              <Icon name='speedometer' size={30} color='black' />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => adjustSpeed(Math.min(2.0, speechRate + 0.1))}
+              style={styles.controlButton}
+            >
+              <Icon name='rocket' size={30} color='black' />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              onPress={handlePreviousChapter}
+              style={styles.button}
+            >
+              <Text style={styles.buttonText}>Chương trước</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleNextChapter} style={styles.button}>
+              <Text style={styles.buttonText}>Chương sau</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       )}
-
-      <Text style={styles.progress}>
-        Tiến độ: {bookReader.getProgressPercentage()}%
-      </Text>
-      <View style={styles.controls}>
-        <Button icon='rewind' onPress={bookReader.speakPreviousSentence} />
-        {bookReader.playbackState === 'playing' ? (
-          <Button icon='pause' onPress={bookReader.pauseSpeech} />
-        ) : (
-          <Button icon='play' onPress={bookReader.speakNextSentence} />
-        )}
-        <Button icon='fast-forward' onPress={bookReader.speakNextSentence} />
-        <Button
-          icon='volume-high'
-          onPress={() => bookReader.adjustVolume(bookReader.volume + 0.1)}
-        />
-        <Button
-          icon='volume-low'
-          onPress={() =>
-            bookReader.adjustVolume(Math.max(0, bookReader.volume - 0.1))
-          }
-        />
-      </View>
-      <View style={styles.controls}>
-        <Button
-          icon='speedometer-slow'
-          onPress={() =>
-            bookReader.adjustSpeed(Math.max(0.5, bookReader.speechRate - 0.1))
-          }
-        />
-        <Button
-          icon='speedometer'
-          onPress={() => bookReader.adjustSpeed(1.0)}
-        />
-        <Button
-          icon='speedometer-fast'
-          onPress={() =>
-            bookReader.adjustSpeed(Math.min(2.0, bookReader.speechRate + 0.1))
-          }
-        />
-      </View>
-
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity onPress={handlePreviousChapter} style={styles.button}>
-          <Text style={styles.buttonText}>Chương trước</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={handleSpeak} style={styles.button}>
-          <Text style={styles.buttonText}>Đọc</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={handleNextChapter} style={styles.button}>
-          <Text style={styles.buttonText}>Chương sau</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   )
 }
@@ -183,42 +196,60 @@ const BookReaderScreen = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor: '#fff',
+    // backgroundColor: '#fff'
     padding: 10
   },
   coverImage: {
-    width: '100%',
-    height: 100,
-    resizeMode: 'contain'
+    width: 100,
+    height: 150,
+    padding: 5
+  },
+  bookDetails: {
+    flex: 1
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginVertical: 20
+    marginBottom: 20
   },
   author: {
-    fontSize: 18,
-    // textAlign: 'center',
+    fontSize: 16,
     marginBottom: 10,
     color: '#555' // Màu xám nhạt cho tác giả
   },
   description: {
     fontSize: 16,
     marginBottom: 20,
-    lineHeight: 24 // Khoảng cách dòng rộng hơn
+    lineHeight: 20
   },
   content: {
-    flex: 1
+    flex: 1,
   },
   chapterContent: {
-    fontSize: 20,
-    lineHeight: 30 // Khoảng cách dòng lớn hơn
+    fontSize: 18,
+  },
+  currentSentence: {
+    fontWeight: 'bold',
+    color: '#007BFF' // Màu xanh dương nổi bật
+  },
+  progress: {
+    textAlign: 'center',
+    marginBottom: 10,
+    fontSize: 16
+  },
+  controls: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    marginBottom: 10
+  },
+  controlButton: {
+    padding: 10
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    padding: 20
+    padding: 10
   },
   button: {
     backgroundColor: '#007BFF',
@@ -240,10 +271,10 @@ const styles = StyleSheet.create({
   coverImage: {
     width: 80,
     height: 100,
-    marginRight: 10 // Khoảng cách giữa ảnh bìa và thông tin sách
+    marginRight: 10
   },
   bookDetails: {
-    flex: 1 // Cho phép phần thông tin sách chiếm không gian còn lại
+    flex: 1
   },
   title: {
     fontSize: 20,
