@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef, useCallback } from 'react'
 import {
   View,
   Text,
@@ -46,6 +46,7 @@ const BookReaderScreen = ({ route }) => {
     playbackState,
     speechRate,
     volume,
+    speakCurrentSentence,
     speakNextSentence,
     speakPreviousSentence,
     pauseSpeech,
@@ -56,6 +57,8 @@ const BookReaderScreen = ({ route }) => {
     goToSentence,
     getProgressPercentage
   } = useBookReader(bookChapterContent)
+  const scrollViewRef = useRef(null)
+  const sentenceRefs = useRef([])
 
   useFocusEffect(
     React.useCallback(() => {
@@ -66,6 +69,33 @@ const BookReaderScreen = ({ route }) => {
       stop()
     }, [])
   )
+
+  useEffect(() => {
+    console.log('currentSentenceIndex: ----> ', currentSentenceIndex)
+    speakCurrentSentence()
+    if (!isLoading && scrollViewRef.current) {
+      sentenceRefs.current.forEach((ref, index) => {
+        if (ref) {
+          ref.measure((x, y, width, height, pageX, pageY) => {
+            sentences[index].y = pageY // Lưu trữ vị trí y của câu
+          })
+        }
+      })
+    }
+    scrollToCurrentSentence()
+    return () => {
+      stopSpeech()
+    }
+  }, [currentSentenceIndex, sentences, sentenceRefs])
+
+  const scrollToCurrentSentence = useCallback(() => {
+    if (scrollViewRef.current && sentences[currentSentenceIndex]?.y) {
+      scrollViewRef.current.scrollTo({
+        y: sentences[currentSentenceIndex].y,
+        animated: true
+      })
+    }
+  }, [currentSentenceIndex, sentences, sentenceRefs])
 
   const toggleDescription = () => {
     setShowFullDescription(!showFullDescription)
@@ -111,10 +141,11 @@ const BookReaderScreen = ({ route }) => {
         <ActivityIndicator size='large' style={styles.loadingIndicator} />
       ) : (
         <View style={styles.content}>
-          <ScrollView style={styles.content}>
+          <ScrollView style={styles.content} ref={scrollViewRef}>
             {sentences.map((sentence, index) => (
               <Text
                 key={index}
+                ref={ref => (sentenceRefs.current[index] = ref)}
                 style={[
                   styles.chapterContent,
                   index === currentSentenceIndex && styles.currentSentence
@@ -237,10 +268,10 @@ const styles = StyleSheet.create({
     lineHeight: 20
   },
   content: {
-    flex: 1,
+    flex: 1
   },
   chapterContent: {
-    fontSize: 18,
+    fontSize: 18
   },
   currentSentence: {
     fontWeight: 'bold',
