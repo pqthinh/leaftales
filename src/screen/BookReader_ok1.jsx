@@ -26,9 +26,6 @@ const BookReaderScreen = ({ route }) => {
   const [speechRate, setSpeechRate] = useState(1.0)
   const [volume, setVolume] = useState(1.0)
 
-  const scrollViewRef = useRef(null)
-  const sentenceRefs = useRef([])
-
   useEffect(() => {
     const fetchChapterContent = async () => {
       try {
@@ -54,71 +51,116 @@ const BookReaderScreen = ({ route }) => {
         .split(/[.?!;]/)
         .filter(sentence => sentence.trim() !== '')
       setSentences(newSentences)
-      setCurrentSentenceIndex(0)
-      setPlaybackState('stopped')
-      stopSpeech()
     }
-  }, [bookChapterContent, currentChapterIndex])
+  }, [bookChapterContent])
 
   const speak = useCallback(
     sentence => {
+      console.log('playbackState-> ', playbackState)
+      // if (playbackState !== 'playing') {
+      // setPlaybackState('playing')
       Speech.speak(sentence, {
         language: 'vi',
         rate: speechRate,
-        volume: volume,
         onDone: () => {
-        //   console.log(currentSentenceIndex, sentences.length)
           if (currentSentenceIndex < sentences.length - 1) {
-            setCurrentSentenceIndex(prevIndex => {
-              // speakCurrentSentence()
-              speak(sentences[prevIndex + 1])
-              return prevIndex + 1
-            })
+            setCurrentSentenceIndex(prevIndex => prevIndex + 1)
+            speak(sentences[currentSentenceIndex])
             // speakCurrentSentence()
           } else {
             setPlaybackState('stopped')
           }
         },
-        onStopped: () => setPlaybackState('stopped'),
-        onError: () => setPlaybackState('stopped')
+        onPause: () => setPlaybackState('paused'),
+        onResume: () => setPlaybackState('resume')
       })
+      //   }
     },
-    [currentChapterIndex, currentSentenceIndex, sentences, speechRate, volume, speakCurrentSentence]
+    [
+      currentSentenceIndex,
+      playbackState,
+      sentences,
+      speechRate,
+      speak
+    ]
   )
 
   const speakCurrentSentence = useCallback(() => {
+    console.log(currentSentenceIndex, sentences.length)
     if (currentSentenceIndex < sentences.length) {
       speak(sentences[currentSentenceIndex])
+      //   setPlaybackState('start')
       setPlaybackState('playing')
     }
-  }, [currentChapterIndex, currentSentenceIndex, sentences, speak])
+  }, [currentSentenceIndex, sentences, speak, playbackState])
+
+  const speakNextSentence = useCallback(() => {
+    if (currentSentenceIndex < sentences.length - 1) {
+      setCurrentSentenceIndex(prevIndex => prevIndex + 1)
+      speak(sentences[currentSentenceIndex + 1])
+    }
+  }, [currentSentenceIndex, sentences, speak])
+
+  const speakPreviousSentence = useCallback(() => {
+    if (currentSentenceIndex > 0) {
+      setCurrentSentenceIndex(prevIndex => prevIndex - 1)
+      speak(sentences[currentSentenceIndex - 1])
+    }
+  }, [currentSentenceIndex, sentences, speak])
 
   const pauseSpeech = useCallback(async () => {
-    // await Speech.pause()
-    await Speech.stop()
+    await Speech.pause()
     setPlaybackState('paused')
-  }, [currentChapterIndex, currentSentenceIndex, sentences, playbackState])
+  }, [])
 
   const resumeSpeech = useCallback(async () => {
-    // await Speech.resume()
+    await Speech.resume()
     speakCurrentSentence()
-    setPlaybackState('playing')
-  }, [currentChapterIndex, currentSentenceIndex, sentences, playbackState, speakCurrentSentence])
+    setPlaybackState('resume')
+  }, [speakCurrentSentence])
 
   const stopSpeech = useCallback(async () => {
     await Speech.stop()
     setPlaybackState('stopped')
   }, [])
 
+  const adjustSpeed = useCallback(newRate => {
+    setSpeechRate(newRate)
+  }, [])
+
+  const adjustVolume = useCallback(newVolume => {
+    setVolume(newVolume)
+  }, [])
+
+  const goToSentence = useCallback(
+    index => {
+      if (index >= 0 && index < sentences.length) {
+        setCurrentSentenceIndex(index)
+        speak(sentences[index])
+      }
+    },
+    [sentences, speak]
+  )
+
+  const getProgressPercentage = useCallback(() => {
+    return Math.round((currentSentenceIndex / sentences.length) * 100)
+  }, [currentSentenceIndex, sentences])
+
+  const scrollViewRef = useRef(null)
+  const sentenceRefs = useRef([])
+
   useFocusEffect(
     useCallback(() => {
-      return () => {
+      const stop = async () => {
+        await Speech.stop()
         stopSpeech()
       }
+      stop()
     }, [stopSpeech])
   )
 
   useEffect(() => {
+    // speakCurrentSentence()
     if (!isLoading && scrollViewRef.current) {
       sentenceRefs.current.forEach((ref, index) => {
         if (ref) {
@@ -133,7 +175,17 @@ const BookReaderScreen = ({ route }) => {
       })
     }
     scrollToCurrentSentence()
-  }, [currentChapterIndex, currentSentenceIndex, sentences, isLoading])
+    return () => {
+      stopSpeech()
+    }
+  }, [
+    currentChapterIndex,
+    currentSentenceIndex,
+    sentences,
+    isLoading,
+    speakCurrentSentence,
+    stopSpeech
+  ])
 
   const scrollToCurrentSentence = useCallback(() => {
     if (
@@ -164,10 +216,6 @@ const BookReaderScreen = ({ route }) => {
       setIsLoading(true)
     }
   }, [currentChapterIndex])
-
-  const getProgressPercentage = useCallback(() => {
-    return Math.round((currentSentenceIndex / sentences.length) * 100)
-  }, [currentSentenceIndex, sentences])
 
   return (
     <View style={styles.container}>
@@ -216,11 +264,7 @@ const BookReaderScreen = ({ route }) => {
           <View style={styles.controlContainer}>
             <View style={styles.controls}>
               <TouchableOpacity
-                onPress={() => {
-                  if (currentSentenceIndex > 0) {
-                    setCurrentSentenceIndex(prevIndex => prevIndex - 1)
-                  }
-                }}
+                onPress={speakPreviousSentence}
                 style={styles.controlButton}
               >
                 <Icon name='play-back' size={30} color='black' />
@@ -234,10 +278,10 @@ const BookReaderScreen = ({ route }) => {
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity
-                  onPress={
-                    playbackState === 'stopped'
-                      ? speakCurrentSentence
-                      : resumeSpeech
+                  onPress={speakCurrentSentence
+                    // playbackState === 'stopped'
+                    //   ? speakCurrentSentence
+                    //   : resumeSpeech
                   }
                   style={styles.controlButton}
                 >
@@ -245,11 +289,7 @@ const BookReaderScreen = ({ route }) => {
                 </TouchableOpacity>
               )}
               <TouchableOpacity
-                onPress={() => {
-                  if (currentSentenceIndex < sentences.length - 1) {
-                    setCurrentSentenceIndex(prevIndex => prevIndex + 1)
-                  }
-                }}
+                onPress={speakNextSentence}
                 style={styles.controlButton}
               >
                 <Icon name='play-forward' size={30} color='black' />

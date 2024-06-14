@@ -26,9 +26,6 @@ const BookReaderScreen = ({ route }) => {
   const [speechRate, setSpeechRate] = useState(1.0)
   const [volume, setVolume] = useState(1.0)
 
-  const scrollViewRef = useRef(null)
-  const sentenceRefs = useRef([])
-
   useEffect(() => {
     const fetchChapterContent = async () => {
       try {
@@ -46,7 +43,7 @@ const BookReaderScreen = ({ route }) => {
     }
 
     fetchChapterContent()
-  }, [currentChapterIndex, book.id])
+  }, [currentChapterIndex])
 
   useEffect(() => {
     if (bookChapterContent) {
@@ -54,71 +51,100 @@ const BookReaderScreen = ({ route }) => {
         .split(/[.?!;]/)
         .filter(sentence => sentence.trim() !== '')
       setSentences(newSentences)
-      setCurrentSentenceIndex(0)
-      setPlaybackState('stopped')
-      stopSpeech()
     }
-  }, [bookChapterContent, currentChapterIndex])
+  }, [bookChapterContent])
 
-  const speak = useCallback(
-    sentence => {
+  const speak = sentence => {
+    if (playbackState === 'playing')
       Speech.speak(sentence, {
         language: 'vi',
         rate: speechRate,
-        volume: volume,
         onDone: () => {
-        //   console.log(currentSentenceIndex, sentences.length)
           if (currentSentenceIndex < sentences.length - 1) {
-            setCurrentSentenceIndex(prevIndex => {
-              // speakCurrentSentence()
-              speak(sentences[prevIndex + 1])
-              return prevIndex + 1
-            })
-            // speakCurrentSentence()
+            setCurrentSentenceIndex(currentSentenceIndex + 1)
           } else {
             setPlaybackState('stopped')
           }
         },
-        onStopped: () => setPlaybackState('stopped'),
-        onError: () => setPlaybackState('stopped')
+        onPause: () => {
+          setPlaybackState('paused')
+        },
+        onResume: () => {
+          setPlaybackState('resume')
+        },
       })
-    },
-    [currentChapterIndex, currentSentenceIndex, sentences, speechRate, volume, speakCurrentSentence]
-  )
+  }
 
   const speakCurrentSentence = useCallback(() => {
-    if (currentSentenceIndex < sentences.length) {
+    if (currentSentenceIndex < sentences.length - 1) {
       speak(sentences[currentSentenceIndex])
-      setPlaybackState('playing')
     }
-  }, [currentChapterIndex, currentSentenceIndex, sentences, speak])
+  }, [sentences, currentSentenceIndex])
 
-  const pauseSpeech = useCallback(async () => {
-    // await Speech.pause()
-    await Speech.stop()
+  const speakNextSentence = useCallback(() => {
+    if (currentSentenceIndex < sentences.length - 1) {
+      setCurrentSentenceIndex(currentSentenceIndex + 1)
+      speak(sentences[currentSentenceIndex])
+    }
+  }, [sentences, currentSentenceIndex])
+
+  const speakPreviousSentence = useCallback(() => {
+    if (currentSentenceIndex > 0) {
+      setCurrentSentenceIndex(currentSentenceIndex - 1)
+      speak(sentences[currentSentenceIndex])
+    }
+  }, [sentences, currentSentenceIndex])
+
+  const pauseSpeech = async () => {
+    await Speech.pause()
     setPlaybackState('paused')
-  }, [currentChapterIndex, currentSentenceIndex, sentences, playbackState])
+  }
 
-  const resumeSpeech = useCallback(async () => {
-    // await Speech.resume()
-    speakCurrentSentence()
+  const resumeSpeech = async () => {
+    await Speech.resume()
+    speak(sentences[currentSentenceIndex])
     setPlaybackState('playing')
-  }, [currentChapterIndex, currentSentenceIndex, sentences, playbackState, speakCurrentSentence])
+  }
 
-  const stopSpeech = useCallback(async () => {
-    await Speech.stop()
+  const stopSpeech = () => {
+    Speech.stop()
     setPlaybackState('stopped')
-  }, [])
+  }
+
+  const adjustSpeed = newRate => {
+    setSpeechRate(newRate)
+  }
+
+  const adjustVolume = newVolume => {
+    setVolume(newVolume)
+  }
+
+  const goToSentence = index => {
+    if (index >= 0 && index < sentences.length) {
+      setCurrentSentenceIndex(index)
+      speak(sentences[index])
+    }
+  }
+
+  const getProgressPercentage = useCallback(() => {
+    return Math.round((currentSentenceIndex / sentences.length) * 100)
+  }, [currentSentenceIndex, sentences])
+
+  const scrollViewRef = useRef(null)
+  const sentenceRefs = useRef([])
 
   useFocusEffect(
-    useCallback(() => {
-      return () => {
+    React.useCallback(() => {
+      async function stop() {
+        await Speech.stop()
         stopSpeech()
       }
-    }, [stopSpeech])
+      stop()
+    }, [])
   )
 
   useEffect(() => {
+    speakCurrentSentence()
     if (!isLoading && scrollViewRef.current) {
       sentenceRefs.current.forEach((ref, index) => {
         if (ref) {
@@ -133,41 +159,37 @@ const BookReaderScreen = ({ route }) => {
       })
     }
     scrollToCurrentSentence()
-  }, [currentChapterIndex, currentSentenceIndex, sentences, isLoading])
+    return () => {
+      stopSpeech()
+    }
+  }, [currentChapterIndex, currentSentenceIndex, sentences, sentenceRefs, scrollViewRef, isLoading])
 
   const scrollToCurrentSentence = useCallback(() => {
-    if (
-      scrollViewRef.current &&
-      sentenceRefs.current[currentSentenceIndex]?.layout
-    ) {
+    if (scrollViewRef.current && sentences[currentSentenceIndex]?.y) {
       scrollViewRef.current.scrollTo({
-        y: sentenceRefs.current[currentSentenceIndex].layout.y,
+        y: sentences[currentSentenceIndex].y,
         animated: true
       })
     }
-  }, [currentSentenceIndex])
+  }, [currentChapterIndex, currentSentenceIndex, sentences, sentenceRefs, scrollViewRef])
 
-  const toggleDescription = useCallback(() => {
-    setShowFullDescription(prevState => !prevState)
-  }, [])
+  const toggleDescription = () => {
+    setShowFullDescription(!showFullDescription)
+  }
 
-  const handleNextChapter = useCallback(() => {
-    if (currentChapterIndex < book.chapters.length) {
-      setCurrentChapterIndex(prevIndex => prevIndex + 1)
+  const handleNextChapter = () => {
+    if (currentChapterIndex < book.chapters.length - 1) {
+      setCurrentChapterIndex(currentChapterIndex + 1)
       setIsLoading(true)
     }
-  }, [currentChapterIndex, book.chapters.length])
+  }
 
-  const handlePreviousChapter = useCallback(() => {
-    if (currentChapterIndex > 1) {
-      setCurrentChapterIndex(prevIndex => prevIndex - 1)
+  const handlePreviousChapter = () => {
+    if (currentChapterIndex > 0) {
+      setCurrentChapterIndex(currentChapterIndex - 1)
       setIsLoading(true)
     }
-  }, [currentChapterIndex])
-
-  const getProgressPercentage = useCallback(() => {
-    return Math.round((currentSentenceIndex / sentences.length) * 100)
-  }, [currentSentenceIndex, sentences])
+  }
 
   return (
     <View style={styles.container}>
@@ -212,83 +234,70 @@ const BookReaderScreen = ({ route }) => {
           <Text style={styles.progress}>
             Tiến độ: {getProgressPercentage()}%
           </Text>
-
-          <View style={styles.controlContainer}>
-            <View style={styles.controls}>
+          <View style={styles.controls}>
+            <TouchableOpacity
+              onPress={speakPreviousSentence}
+              style={styles.controlButton}
+            >
+              <Icon name='play-back' size={30} color='black' />
+            </TouchableOpacity>
+            {playbackState === 'playing' ? (
               <TouchableOpacity
-                onPress={() => {
-                  if (currentSentenceIndex > 0) {
-                    setCurrentSentenceIndex(prevIndex => prevIndex - 1)
-                  }
-                }}
+                onPress={pauseSpeech}
                 style={styles.controlButton}
               >
-                <Icon name='play-back' size={30} color='black' />
+                <Icon name='pause' size={30} color='black' />
               </TouchableOpacity>
-              {playbackState === 'playing' ? (
-                <TouchableOpacity
-                  onPress={pauseSpeech}
-                  style={styles.controlButton}
-                >
-                  <Icon name='pause' size={30} color='black' />
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity
-                  onPress={
-                    playbackState === 'stopped'
-                      ? speakCurrentSentence
-                      : resumeSpeech
-                  }
-                  style={styles.controlButton}
-                >
-                  <Icon name='play' size={30} color='black' />
-                </TouchableOpacity>
-              )}
+            ) : (
               <TouchableOpacity
-                onPress={() => {
-                  if (currentSentenceIndex < sentences.length - 1) {
-                    setCurrentSentenceIndex(prevIndex => prevIndex + 1)
-                  }
-                }}
+                onPress={
+                  playbackState === 'stopped'
+                    ? speakCurrentSentence
+                    : resumeSpeech
+                }
                 style={styles.controlButton}
               >
-                <Icon name='play-forward' size={30} color='black' />
+                <Icon name='play' size={30} color='black' />
               </TouchableOpacity>
-            </View>
-
-            <View style={styles.verticalControls}>
-              <TouchableOpacity
-                onPress={() => adjustVolume(volume + 0.1)}
-                style={styles.controlButton}
-              >
-                <Icon name='volume-high' size={30} color='black' />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => adjustVolume(volume - 0.1)}
-                style={styles.controlButton}
-              >
-                <Icon name='volume-low' size={30} color='black' />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => adjustSpeed(Math.max(0.5, speechRate - 0.1))}
-                style={styles.controlButton}
-              >
-                <Icon name='walk' size={30} color='black' />
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => adjustSpeed(1.0)}
-                style={styles.controlButton}
-              >
-                <Icon name='speedometer' size={30} color='black' />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => adjustSpeed(Math.min(2.0, speechRate + 0.1))}
-                style={styles.controlButton}
-              >
-                <Icon name='rocket' size={30} color='black' />
-              </TouchableOpacity>
-            </View>
+            )}
+            <TouchableOpacity
+              onPress={speakNextSentence}
+              style={styles.controlButton}
+            >
+              <Icon name='play-forward' size={30} color='black' />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => adjustVolume(volume + 0.1)}
+              style={styles.controlButton}
+            >
+              <Icon name='volume-high' size={30} color='black' />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => adjustVolume(Math.max(0, volume - 0.1))}
+              style={styles.controlButton}
+            >
+              <Icon name='volume-low' size={30} color='black' />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.controls}>
+            <TouchableOpacity
+              onPress={() => adjustSpeed(Math.max(0.5, speechRate - 0.1))}
+              style={styles.controlButton}
+            >
+              <Icon name='walk' size={30} color='black' />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => adjustSpeed(1.0)}
+              style={styles.controlButton}
+            >
+              <Icon name='speedometer' size={30} color='black' />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => adjustSpeed(Math.min(2.0, speechRate + 0.1))}
+              style={styles.controlButton}
+            >
+              <Icon name='rocket' size={30} color='black' />
+            </TouchableOpacity>
           </View>
 
           <View style={styles.buttonContainer}>
@@ -336,9 +345,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 20,
     lineHeight: 20
-  },
-  seeMoreText: {
-    color: '#007BFF'
   },
   content: {
     flex: 1
@@ -399,19 +405,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 5
-  },
-  verticalControls: {
-    position: 'absolute',
-    right: 0,
-    bottom: 200,
-    flexDirection: 'column',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-    width: 50
-  },
-  controlButton: {
-    padding: 10
   }
 })
 
