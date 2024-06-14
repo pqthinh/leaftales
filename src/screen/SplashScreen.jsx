@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { Animated, ImageBackground, StyleSheet, Text, View } from 'react-native'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
+// import { DrawerActions } from '@react-navigation/native'
 import * as Speech from 'expo-speech'
 
 function SplashScreen() {
@@ -14,6 +15,15 @@ function SplashScreen() {
       useNativeDriver: true
     }).start()
   }, [fadeAnim])
+
+  // useEffect(() => {
+  //   const unsubscribe = navigation.addListener('focus', () => {
+  //     navigation.dispatch(DrawerActions.closeDrawer())
+  //     navigation.setOptions({ gestureEnabled: false })
+  //   })
+
+  //   return unsubscribe
+  // }, [navigation])
 
   useFocusEffect(
     React.useCallback(() => {

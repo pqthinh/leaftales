@@ -17,22 +17,22 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native'
 const socket = io(SOCKET_URL)
 
 const questions = [
-    'Xin chào, bạn tên là gì?'
-    // 'Bạn bao nhiêu tuổi?',
-    // 'Bạn là nam hay nữ?',
+    'Xin chào, bạn tên là gì?',
+    'Bạn bao nhiêu tuổi?',
+    'Bạn là nam hay nữ?',
     // 'Sở thích của bạn là gì?',
     // 'Thói quen của bạn là gì?',
-    // 'Bạn thích đọc thể loại sách nào?',
-    // 'Bạn thường có thời gian rảnh vào lúc nào?'
+    'Bạn thích đọc thể loại sách nào?',
+    'Bạn thường có thời gian rảnh vào lúc nào?'
   ],
   keys = [
-    'name'
-    // 'age',
-    // 'gender',
+    'name',
+    'age',
+    'gender',
     // 'hobbies',
     // 'routine',
-    // 'kind_of_book',
-    // 'free_at'
+    'kind_of_book',
+    'free_at'
   ]
 
 const UserInfoScreen = () => {
@@ -53,7 +53,7 @@ const UserInfoScreen = () => {
     return () => {
       socket.off('transcription')
     }
-  }, [currentQuestionIndex])
+  }, [currentQuestionIndex, questions])
 
   useFocusEffect(
     React.useCallback(() => {
@@ -128,7 +128,8 @@ const UserInfoScreen = () => {
       [keys[currentQuestionIndex]]: text
     }))
     setCurrentQuestionIndex(currentQuestionIndex + 1)
-    
+    setIsLoading(false)
+    if (currentQuestionIndex < questions.length -1) return
     Speech.speak(
       'Cảm ơn bạn đã cung cấp thông tin.\n Hệ thống sẽ đề xuất một số cuốn sách phù hợp với bạn.\n Xin vui lòng chờ trong giây lát!',
       { language: 'vi' }
@@ -144,7 +145,6 @@ const UserInfoScreen = () => {
       navigation.navigate('HomeStack')
     }, 10000)
 
-    setIsLoading(false)
   }
 
   return (
