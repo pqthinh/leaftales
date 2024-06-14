@@ -17,8 +17,8 @@ function SplashScreen() {
 
   useFocusEffect(
     React.useCallback(() => {
-      return () => {
-        Speech.stop()
+      return async () => {
+        await Speech.stop()
       }
     }, [])
   )
@@ -28,13 +28,13 @@ function SplashScreen() {
       'Chào mừng bạn đến với ứng dụng đọc sách dành cho người khiếm thị.',
       { language: 'vi' }
     )
-    const timer = setTimeout(() => {
+    const timer = setTimeout(async () => {
+      await Speech.stop()
       navigation.navigate('UserInfoScreen')
     }, 5000)
 
     return () => {
       clearTimeout(timer)
-      Speech.stop()
     }
   }, [])
 

@@ -109,12 +109,12 @@ const styles = StyleSheet.create({
   micButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
     borderRadius: 50,
     backgroundColor: '#f0f0f0',
     position: 'absolute',
-    bottom: 5
+    bottom: 0
   },
   transcription: {
     position: 'absolute',

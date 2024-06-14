@@ -11,6 +11,8 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons'
 import { getBookDetail } from '../api/book'
 import useBookReader from '../hooks/useBookReader'
+import { useFocusEffect } from '@react-navigation/native'
+import * as Speech from 'expo-speech'
 
 const BookReaderScreen = ({ route }) => {
   const book = route.params
@@ -32,7 +34,6 @@ const BookReaderScreen = ({ route }) => {
         setIsLoading(false)
       } catch (error) {
         console.error('Error fetching chapter content:', error)
-        // Xử lý lỗi (ví dụ: hiển thị thông báo lỗi)
       }
     }
 
@@ -55,6 +56,17 @@ const BookReaderScreen = ({ route }) => {
     goToSentence,
     getProgressPercentage
   } = useBookReader(bookChapterContent)
+
+  useFocusEffect(
+    React.useCallback(() => {
+      async function stop() {
+        await Speech.stop()
+        stopSpeech()
+      }
+      stop()
+    }, [])
+  )
+
   const toggleDescription = () => {
     setShowFullDescription(!showFullDescription)
   }
@@ -131,7 +143,7 @@ const BookReaderScreen = ({ route }) => {
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
-                onPress={speakNextSentence}
+                onPress={resumeSpeech}
                 style={styles.controlButton}
               >
                 <Icon name='play' size={30} color='black' />
@@ -176,6 +188,7 @@ const BookReaderScreen = ({ route }) => {
               <Icon name='rocket' size={30} color='black' />
             </TouchableOpacity>
           </View>
+
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               onPress={handlePreviousChapter}
@@ -183,6 +196,7 @@ const BookReaderScreen = ({ route }) => {
             >
               <Text style={styles.buttonText}>Chương trước</Text>
             </TouchableOpacity>
+
             <TouchableOpacity onPress={handleNextChapter} style={styles.button}>
               <Text style={styles.buttonText}>Chương sau</Text>
             </TouchableOpacity>
@@ -241,7 +255,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    marginBottom: 10
+    marginBottom: 10,
+    backgroundColor: '#fff'
   },
   controlButton: {
     padding: 10

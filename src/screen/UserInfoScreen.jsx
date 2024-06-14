@@ -57,7 +57,10 @@ const UserInfoScreen = () => {
 
   useFocusEffect(
     React.useCallback(() => {
-      Speech.stop()
+      async function stop() {
+        await Speech.stop()
+      }
+      stop()
     }, [])
   )
 
