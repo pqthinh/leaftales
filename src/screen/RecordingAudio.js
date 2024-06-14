@@ -16,7 +16,7 @@ export default function RecordingAudio() {
         console.log('Permission Granted: ' + permission.granted);
         setAudioPermission(permission.granted)
       }).catch(error => {
-        console.log(error);
+        console.log('Permission Grant error: ---> ', error);
       });
     }
 

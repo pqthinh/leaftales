@@ -17,25 +17,25 @@ const HomeScreen = () => {
     }
     fetch()
   }, [])
-  const onBookPress = (id) => {
-    const bookDetail = booksData[id]
-    navigation.navigate("BookDetail", {...bookDetail})
+  const onBookPress = item => {
+    console.log('list book content: ----> ', item)
+    navigation.navigate('BookDetail', { ...item })
   }
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Đề xuất dành cho bạn:</Text>
       <FlatList
         data={booksData}
-        renderItem={({ item }, i) => (
+        renderItem={({ item }) => (
           <BookItem
             name={item.name}
             author={item.author.name}
             coverImage={item.coverImage}
-            onBookPress={()=>onBookPress(i)}
-            key={i}
+            onBookPress={() => onBookPress(item)}
+            key={item.id + item.name + item.coverImage}
           />
         )}
-        keyExtractor={item => item.title}
+        keyExtractor={item => item.id + item.name + item.coverImage}
         contentContainerStyle={styles.flatListContent}
       />
     </View>

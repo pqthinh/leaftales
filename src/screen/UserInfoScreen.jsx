@@ -118,7 +118,6 @@ const UserInfoScreen = () => {
   }
 
   const handleSpeechResult = text => {
-    console.log(text)
     setIsLoading(true)
 
     setAnswers(prevAnswers => ({
@@ -126,13 +125,13 @@ const UserInfoScreen = () => {
       [keys[currentQuestionIndex]]: text
     }))
     setCurrentQuestionIndex(currentQuestionIndex + 1)
-    console.log('Thông tin người dùng:', answers)
+    
     Speech.speak(
       'Cảm ơn bạn đã cung cấp thông tin.\n Hệ thống sẽ đề xuất một số cuốn sách phù hợp với bạn.\n Xin vui lòng chờ trong giây lát!',
       { language: 'vi' }
     )
     setTimeout(async () => {
-      console.log(answers)
+      console.log('Thông tin người dùng:', answers)
       await set('@app/get_user_info', {
         name: 'ThinhPQ10',
         age: 24,

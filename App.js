@@ -17,7 +17,7 @@ export default function App() {
   useEffect(() => {
     async function getInfo() {
       const info = await get('@app/get_user_info')
-      console.log('user info', info)
+      console.log('user info get from home : ----> ', info)
       setUserInfo(info)
     }
     getInfo()

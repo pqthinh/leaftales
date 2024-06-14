@@ -24,16 +24,17 @@ const { dispatch } = store
 
 export const getBooksApi = async params => {
   try {
-    const params = {
+    const p = {
       device_id: '1',
       author_name: '',
       category_name: '',
       book_name: '',
       offset_limit: 10
     }
-    const data = await axios.post('/api/v1/book_info', params)
+    const data = await axios.post('/api/v1/book_info', { ...p, ...params })
     if (data && data.data) {
-      const books = [], speakBook = []
+      const books = [],
+        speakBook = []
       data.data.forEach((bookData, index) => {
         const { author, category, book } = bookData
         const newBookInfo = {
@@ -53,7 +54,11 @@ export const getBooksApi = async params => {
           }
         }
         books.push(newBookInfo)
-        speakBook.push(`${index+1} - Sách ${book.BookName} của tác giả ${author.AuthorName} \n `)
+        speakBook.push(
+          `${index + 1} - Sách ${book.BookName} của tác giả ${
+            author.AuthorName
+          } \n `
+        )
       })
       dispatch(getBooks(books))
       speakResult(speakBook.join(speakBook))
@@ -61,26 +66,26 @@ export const getBooksApi = async params => {
       dispatch(setError(data.error))
     }
   } catch (error) {
-    console.log(error.message)
+    console.log('Get books api has error: ---> ', error.message)
     dispatch(setError(data.message))
   }
 }
 
 export const getBookDetail = async params => {
   try {
-    const params = {
+    const p = {
       device_id: '1',
       book_id: '1',
       chapter_id: '1'
     }
-    const data = await axios.post('/api/v1/book', params)
+    const data = await axios.post('/api/v1/book', { ...p, ...params })
     if (data && data.data) {
       dispatch(getBooks(data.data))
     } else {
       dispatch(setError(data.error))
     }
   } catch (error) {
-    console.log(error)
+    console.log('getBookDetail error: --->>>', error)
     dispatch(setError(data.message))
   }
 }

@@ -1,7 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Platform } from 'react-native'
 
-// 864000000 = 10 ngày
 import { CheckExpireCache, ExpiredTime } from '../util/config'
 
 export default {
@@ -13,8 +12,7 @@ export default {
       }
 
       const json = JSON.stringify(dx)
-      console.log("data cache: ====> ", json)
-      AsyncStorage.setItem(key, json)
+      await AsyncStorage.setItem(key, json)
     } catch (error) {
       console.log('STORAGE SET]Error->', error)
     }
@@ -23,18 +21,16 @@ export default {
     try {
       const json = await AsyncStorage.getItem(key)
       const dx = JSON.parse(json)
-
       if (dx) {
         const expired = new Date(dx.expired)
 
-        if (expired < new Date() && CheckExpireCache, ExpiredTime) {
+        if (expired < new Date() && CheckExpireCache) {
           return
         }
-
         return dx?.data||""
       }
 
-      return dx?.data||""
+      return {}
     } catch (error) {
       console.log('STORAGE GET]Error->', error)
     }
@@ -45,7 +41,6 @@ export default {
 
       if (Platform.OS === 'android') {
         await AsyncStorage.clear()
-
         return
       }
 

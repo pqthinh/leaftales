@@ -26,7 +26,7 @@ export const bookSlice = createSlice({
   initialState,
   reducers: {
     getBooks: (state, action) => {
-      console.log("action in slice", action.payload.length)
+      console.log("action in slice: ---> ", action.payload.length)
       state.books = action.payload
       state.isError = false
       state.error=[]
@@ -61,7 +61,7 @@ export const bookSlice = createSlice({
       state.readingSpeed = action.payload;
     },
     setVolume: (state, action) => {
-      console.log("Volumn", action.payload)
+      console.log("Volumn: --->", action.payload)
       state.volume = action.payload;
     },
     setPitch: (state, action) => {

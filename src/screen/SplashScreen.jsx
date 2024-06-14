@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { Animated, ImageBackground, StyleSheet, Text, View } from 'react-native'
-import { useNavigation } from '@react-navigation/native'
+import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import * as Speech from 'expo-speech'
 
 function SplashScreen() {
@@ -15,18 +15,28 @@ function SplashScreen() {
     }).start()
   }, [fadeAnim])
 
+  useFocusEffect(
+    React.useCallback(() => {
+      return () => {
+        Speech.stop()
+      }
+    }, [])
+  )
+
   useEffect(() => {
     Speech.speak(
       'Chào mừng bạn đến với ứng dụng đọc sách dành cho người khiếm thị.',
       { language: 'vi' }
     )
-
     const timer = setTimeout(() => {
       navigation.navigate('UserInfoScreen')
     }, 5000)
 
-    return () => clearTimeout(timer)
-  }, [navigation])
+    return () => {
+      clearTimeout(timer)
+      Speech.stop()
+    }
+  }, [])
 
   return (
     <View style={styles.container}>

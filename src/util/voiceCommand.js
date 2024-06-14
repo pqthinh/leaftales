@@ -22,8 +22,7 @@ import {
 } from '../store/bookReducer'
 
 export const handleUserCommand = async (command, navigation) => {
-  console.log(command)
-  console.log('thinh')
+  console.log('handleUserCommand ->>>>', command)
   const lowerCaseCommand = command.toLowerCase() // Chuyển câu lệnh về chữ thường để so sánh dễ dàng hơn
 
   if (lowerCaseCommand.includes('tăng âm lượng')) {
