@@ -1,167 +1,100 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import * as Speech from 'expo-speech';
 
-const useBookReader = (bookData) => {
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [index, setIndex] = useState(0);
-  const [chapterIndex, setChapterIndex] = useState(0);
-  const [sentenceIndex, setSentenceIndex] = useState(0);
-  const [playbackState, setPlaybackState] = useState('idle'); // idle, playing, paused
-  const [speechRate, setSpeechRate] = useState(1); // Normalized between 0.25 and 4
-  const [notes, setNotes] = useState([]); // Array of note objects
-  const [bookmarks, setBookmarks] = useState([]); // Array of bookmarked chapter indices
-  const [progressPercentage, setProgressPercentage] = useState(0); // Percentage read
+const useBookReader = (chapterContent) => {
+  const [sentences, setSentences] = useState([]);
+  const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
+  const [playbackState, setPlaybackState] = useState('stopped'); // stopped, playing, paused
+  const [speechRate, setSpeechRate] = useState(1.0); // Tốc độ đọc mặc định
+  const [volume, setVolume] = useState(1.0); // Âm lượng mặc định
 
   useEffect(() => {
-    const isSpeechAvailable = async () => {
-      try {
-        const status = await Speech.getAvailableVoicesAsync();
-        if (status.length === 0) {
-          console.warn('Speech synthesis is not available');
-        }
-      } catch (error) {
-        console.error('Error checking speech availability:', error);
-      }
-    };
-
-    isSpeechAvailable();
-  }, []);
-
-  const speakNextSentence = async () => {
-    if (playbackState === 'idle') {
-      setPlaybackState('playing');
+    if (chapterContent) {
+      // Tách đoạn văn thành mảng các câu
+      const newSentences = chapterContent.split(/[.?!;]/).filter(sentence => sentence.trim() !== '');
+      setSentences(newSentences);
     }
+  }, [chapterContent]);
 
-    if (chapterIndex >= bookData.length || sentenceIndex >= bookData[chapterIndex].sentences.length) {
-      console.warn('Reached the end of the book or chapter');
-      setPlaybackState('idle');
-      return;
-    }
-
-    const sentence = bookData[chapterIndex].sentences[sentenceIndex];
-    try {
-      Speech.speak(sentence, {
-        rate: Math.max(0.25, Math.min(speechRate, 4)),
-        onDone: () => {
-          if (sentenceIndex < bookData[chapterIndex].sentences.length - 1) {
-            setSentenceIndex(sentenceIndex + 1);
-          } else if (chapterIndex < bookData.length - 1) {
-            setChapterIndex(chapterIndex + 1);
-            setSentenceIndex(0);
-          } else {
-            setPlaybackState('idle');
-          }
-          updateProgress();
-        },
-        onError: (error) => {
-          console.error('Error speaking sentence:', error);
-          setPlaybackState('idle');
-          setIsSpeaking(false)
-        },
-        onStart: () => setIsSpeaking(true),
-        onBoundary: (e) => {
-          console.log("onBoundary -> ", e)
-          setIndex(e.startIndex)
+  const speak = (sentence) => {
+    Speech.speak(sentence, {
+      language: 'vi',
+      rate: speechRate,
+      onDone: () => {
+        if (currentSentenceIndex < sentences.length - 1) {
+          setCurrentSentenceIndex(currentSentenceIndex + 1);
+          speak(sentences[currentSentenceIndex + 1]);
+        } else {
+          setPlaybackState('stopped'); // Kết thúc đọc khi hết câu
         }
-      });
-    } catch (error) {
-      console.error('Error speaking sentence:', error);
-      setPlaybackState('idle');
-      setIsSpeaking(false)
+      },
+    });
+    setPlaybackState('playing');
+  };
+
+  const speakNextSentence = () => {
+    if (currentSentenceIndex < sentences.length - 1) {
+      setCurrentSentenceIndex(currentSentenceIndex + 1);
+      speak(sentences[currentSentenceIndex]);
+    }
+  };
+
+  const speakPreviousSentence = () => {
+    if (currentSentenceIndex > 0) {
+      setCurrentSentenceIndex(currentSentenceIndex - 1);
+      speak(sentences[currentSentenceIndex]);
     }
   };
 
   const pauseSpeech = () => {
-    Speech.pause().then(() => setPlaybackState('paused'));
+    Speech.pause();
+    setPlaybackState('paused');
   };
 
   const resumeSpeech = () => {
-    if (playbackState === 'paused') {
-      Speech.resume().then(() => setPlaybackState('playing'));
-    }
+    Speech.resume();
+    setPlaybackState('playing');
   };
 
   const stopSpeech = () => {
-    Speech.stop().then(() => setPlaybackState('idle'));
-    setSentenceIndex(0);
+    Speech.stop();
+    setPlaybackState('stopped');
   };
 
   const adjustSpeed = (newRate) => {
-    setSpeechRate(Math.max(0.25, Math.min(newRate, 4)));
+    setSpeechRate(newRate);
   };
 
-  const addNote = (noteText) => {
-    const newNote = {
-      chapterIndex,
-      sentenceIndex,
-      text: noteText,
-      timestamp: Date.now(),
-    };
-    setNotes([...notes, newNote]);
+  const adjustVolume = (newVolume) => {
+    setVolume(newVolume);
   };
 
-  const toggleBookmark = () => {
-    const isBookmarked = bookmarks.includes(chapterIndex);
-    if (isBookmarked) {
-      setBookmarks(bookmarks.filter((index) => index !== chapterIndex));
-    } else {
-      setBookmarks([...bookmarks, chapterIndex]);
+  const goToSentence = (index) => {
+    if (index >= 0 && index < sentences.length) {
+      setCurrentSentenceIndex(index);
+      speak(sentences[index]);
     }
   };
 
-  const goToChapter = (newChapterIndex) => {
-    if (newChapterIndex >= 0 && newChapterIndex < bookData.length) {
-      setChapterIndex(newChapterIndex);
-      setSentenceIndex(0);
-      setPlaybackState('idle');
-    } else {
-      console.warn('Invalid chapter index');
-    }
-  };
-
-  const seekToSentence = (newChapterIndex, newSentenceIndex) => {
-    if (
-      newChapterIndex >= 0 &&
-      newChapterIndex < bookData.length &&
-      newSentenceIndex >= 0 &&
-      newSentenceIndex < bookData[newChapterIndex].sentences.length
-    ) {
-      setChapterIndex(newChapterIndex);
-      setSentenceIndex(newSentenceIndex);
-      setPlaybackState('idle');
-    } else {
-      console.warn('Invalid chapter or sentence index');
-    }
-  };
-
-  const updateProgress = () => {
-    const totalSentences = bookData.reduce((acc, chapter) => acc + chapter.sentences.length, 0);
-    const currentSentenceIndex = bookData.slice(0, chapterIndex).reduce((acc, chapter) => acc + chapter.sentences.length, 0) + sentenceIndex + 1;
-    const percentage = (currentSentenceIndex / totalSentences) * 100;
-    setProgressPercentage(percentage);
+  const getProgressPercentage = () => {
+    return Math.round((currentSentenceIndex / sentences.length) * 100);
   };
 
   return {
-    isSpeaking,
-    chapterIndex,
-    sentenceIndex,
+    sentences,
+    currentSentenceIndex,
     playbackState,
     speechRate,
-    notes,
-    bookmarks,
-    progressPercentage,
-    index,
-    setIndex,
-    setIsSpeaking,
+    volume,
     speakNextSentence,
+    speakPreviousSentence,
     pauseSpeech,
     resumeSpeech,
     stopSpeech,
     adjustSpeed,
-    addNote,
-    toggleBookmark,
-    goToChapter,
-    seekToSentence,
+    adjustVolume,
+    goToSentence,
+    getProgressPercentage,
   };
 };
 

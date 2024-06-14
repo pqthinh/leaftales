@@ -13,8 +13,8 @@ const BookStack = () => {
   return (
     <Stack.Navigator headerShown="none">
       <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: false }}/>
-      <Stack.Screen name="ListBook" component={ListBook} />
-      <Stack.Screen name="BookDetail" component={BookReader} />
+      <Stack.Screen name="ListBook" component={ListBook} options={{ headerShown: false }}/>
+      <Stack.Screen name="BookDetail" component={BookReader} options={{ headerShown: false }}/>
       <Stack.Screen name="Search" component={SearchScreen} />
       <Stack.Screen name="PlayList" component={PlaylistScreen} />
       <Stack.Screen name="Bookmark" component={BookmarkScreen} />

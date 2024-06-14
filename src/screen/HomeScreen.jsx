@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { View, Text, FlatList, StyleSheet } from 'react-native'
 import BookItem from '../component/BookItem'
-import { getBooksApi } from '../api/book'
-import { useSelector } from 'react-redux'
+import { getBooksApi, rea } from '../api/book'
+import { useDispatch, useSelector } from 'react-redux'
 import { useNavigation } from '@react-navigation/native'
+import { readBookDetail } from '../store/bookReducer'
 
 const HomeScreen = () => {
   const navigation = useNavigation()
+  const dispatch = useDispatch()
   const [booksData, setBooksData] = useState(useSelector(state => state.books))
 
   useEffect(() => {
@@ -18,7 +20,8 @@ const HomeScreen = () => {
     fetch()
   }, [])
   const onBookPress = item => {
-    console.log('list book content: ----> ', item)
+    // console.log('list book content: ----> ', item)
+    dispatch(readBookDetail(item))
     navigation.navigate('BookDetail', { ...item })
   }
   return (

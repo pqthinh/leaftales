@@ -80,7 +80,13 @@ export const getBookDetail = async params => {
     }
     const data = await axios.post('/api/v1/book', { ...p, ...params })
     if (data && data.data) {
-      dispatch(getBooks(data.data))
+      const payload = {
+        content: data.data[0].Text,
+        chapter_id: params.chapter_id || '1',
+        currentPage: 0
+      }
+      dispatch(getBook(payload))
+      return payload
     } else {
       dispatch(setError(data.error))
     }

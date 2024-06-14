@@ -95,7 +95,7 @@ export const VoiceControlComponent = () => {
           color={isMicActive ? 'red' : 'black'}
         />
       </TouchableOpacity>
-      <Text>Transcription: {transcription}</Text>
+      <Text style={styles.transcription}>{transcription}</Text>
     </View>
   )
 }
@@ -104,16 +104,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#f5f5f5'
-  },
-  question: {
-    fontSize: 24, // Tăng kích thước chữ cho dễ đọc
-    textAlign: 'center',
-    marginBottom: 20,
-    color: '#333',
-    fontWeight: 'bold' // Làm chữ đậm hơn
+    alignItems: 'center'
   },
   micButton: {
     alignItems: 'center',
@@ -123,6 +114,10 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     backgroundColor: '#f0f0f0',
     position: 'absolute',
-    bottom: 30
+    bottom: 5
+  },
+  transcription: {
+    position: 'absolute',
+    bottom: 5
   }
 })

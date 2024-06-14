@@ -30,7 +30,7 @@ export default function App() {
           {userInfo ? (
             <>
               <AppDrawer />
-              <View style={{ height: 80 }}>
+              <View style={{ height: 0 }}>
                 <VoiceControlComponent />
               </View>
             </>
