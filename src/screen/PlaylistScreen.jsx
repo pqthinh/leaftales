@@ -58,7 +58,10 @@ const PlaylistScreen = () => {
       lowerCaseCommand.includes('gợi ý')
     ) {
       navigation.navigate('HomeScreen')
-    } else if (lowerCaseCommand.includes('chuyển')||lowerCaseCommand.includes('mở')) {
+    } else if (
+      lowerCaseCommand.includes('chuyển') ||
+      lowerCaseCommand.includes('mở')
+    ) {
       if (
         lowerCaseCommand.includes('playlist') ||
         lowerCaseCommand.includes('lịch sử') ||
@@ -76,10 +79,12 @@ const PlaylistScreen = () => {
       } else if (lowerCaseCommand.includes('tra cứu')) {
         navigation.navigate('Search')
       }
-    } else if (lowerCaseCommand.includes('quay lại')||lowerCaseCommand.includes('trở về')) {
-      
+    } else if (
+      lowerCaseCommand.includes('quay lại') ||
+      lowerCaseCommand.includes('trở về')
+    ) {
       navigation.goBack()
-    } 
+    }
   }
 
   return (

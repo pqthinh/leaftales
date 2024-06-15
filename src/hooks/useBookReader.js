@@ -36,7 +36,7 @@ const useBookReader = chapterContent => {
         },
         onResume: () => {
           setPlaybackState('resume')
-        },
+        }
       })
     // setPlaybackState('playing')
   }

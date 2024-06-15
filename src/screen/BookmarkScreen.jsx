@@ -1,23 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState, useEffect } from 'react'
+import { View, Text, FlatList, StyleSheet } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const BookmarkScreen = () => {
-  const [bookmarkedBooks, setBookmarkedBooks] = useState([]);
+  const [bookmarkedBooks, setBookmarkedBooks] = useState([])
 
   useEffect(() => {
     const loadBookmarkedBooks = async () => {
-      const storedIds = await AsyncStorage.getItem('bookmarkedBooks');
-      setBookmarkedBooks(storedIds ? JSON.parse(storedIds) : []);
-    };
+      const storedIds = await AsyncStorage.getItem('bookmarkedBooks')
+      setBookmarkedBooks(storedIds ? JSON.parse(storedIds) : [])
+    }
 
-    loadBookmarkedBooks();
-  }, []);
+    loadBookmarkedBooks()
+  }, [])
 
-  const handleRemoveBookmark = (bookId) => {
-    setBookmarkedBooks(bookmarkedBooks.filter(id => id !== bookId));
-    AsyncStorage.setItem('bookmarkedBooks', JSON.stringify(bookmarkedBooks.filter(id => id !== bookId)));
-  };
+  const handleRemoveBookmark = bookId => {
+    setBookmarkedBooks(bookmarkedBooks.filter(id => id !== bookId))
+    AsyncStorage.setItem(
+      'bookmarkedBooks',
+      JSON.stringify(bookmarkedBooks.filter(id => id !== bookId))
+    )
+  }
 
   return (
     <View style={styles.container}>
@@ -27,7 +30,10 @@ const BookmarkScreen = () => {
           data={bookmarkedBooks}
           renderItem={({ item }) => (
             <View style={styles.bookItem}>
-              <BookItem bookId={item} onRemoveBookmark={() => handleRemoveBookmark(item)} />
+              <BookItem
+                bookId={item}
+                onRemoveBookmark={() => handleRemoveBookmark(item)}
+              />
             </View>
           )}
           keyExtractor={item => item}
@@ -37,21 +43,21 @@ const BookmarkScreen = () => {
         <Text>No books bookmarked yet.</Text>
       )}
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: 20
   },
   heading: {
     fontSize: 24,
-    marginBottom: 10,
+    marginBottom: 10
   },
   flatListContent: {
-    paddingBottom: 20,
-  },
-});
+    paddingBottom: 20
+  }
+})
 
-export default BookmarkScreen;
+export default BookmarkScreen

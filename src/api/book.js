@@ -2,21 +2,7 @@ import axios from './axios.js'
 import {
   getBooks,
   setError,
-  getBook,
-  updateBook,
-  deleteBook,
-  setCurrentBook,
-  setReadingStatus,
-  setReadingSpeed,
-  setVolume,
-  setPitch,
-  setRecognizedText,
-  setAction,
-  addBookmark,
-  addNote,
-  addToPlaylist,
-  searchBooks,
-  sortBooks
+  getBook
 } from '../store/bookReducer'
 import store from '../store/store.js'
 import speakResult from '../util/speakResult.js'

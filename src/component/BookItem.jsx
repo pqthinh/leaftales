@@ -1,23 +1,30 @@
-import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import * as Speech from 'expo-speech';
+import React, { useState } from 'react'
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Alert
+} from 'react-native'
+import * as Speech from 'expo-speech'
 
 const BookItem = ({ name, author, coverImage, onBookPress }) => {
-  const [isLongPressing, setIsLongPressing] = useState(false);
+  const [isLongPressing, setIsLongPressing] = useState(false)
 
   const handleLongPress = () => {
-    Speech.speak(`Tên sách: ${name}. Tác giả: ${author}`, { language: 'vi' }); // Đọc tiếng Việt
-    setIsLongPressing(true);
-  };
+    Speech.speak(`Tên sách: ${name}. Tác giả: ${author}`, { language: 'vi' }) // Đọc tiếng Việt
+    setIsLongPressing(true)
+  }
 
   const handleLongPressOut = () => {
-    Speech.stop();
-    setIsLongPressing(false);
-  };
+    Speech.stop()
+    setIsLongPressing(false)
+  }
 
   return (
-    <TouchableOpacity 
-      onPress={onBookPress} 
+    <TouchableOpacity
+      onPress={onBookPress}
       onLongPress={handleLongPress}
       onPressOut={handleLongPressOut}
       delayLongPress={500}
@@ -31,31 +38,31 @@ const BookItem = ({ name, author, coverImage, onBookPress }) => {
         </View>
       </View>
     </TouchableOpacity>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   bookItem: {
     flexDirection: 'row',
     marginBottom: 15,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   bookImage: {
     width: 100,
     height: 150,
-    marginRight: 10,
+    marginRight: 10
   },
   bookInfo: {
-    flex: 1,
+    flex: 1
   },
   bookTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 5
   },
   bookAuthor: {
-    fontSize: 16,
-  },
-});
+    fontSize: 16
+  }
+})
 
-export default BookItem;
+export default BookItem

@@ -107,7 +107,13 @@ const BookReaderScreen = ({ route }) => {
     // await Speech.pause()
     await Speech.stop()
     setPlaybackState('paused')
-  }, [bookChapterContent, currentChapterIndex, currentSentenceIndex, sentences, playbackState])
+  }, [
+    bookChapterContent,
+    currentChapterIndex,
+    currentSentenceIndex,
+    sentences,
+    playbackState
+  ])
 
   const resumeSpeech = useCallback(async () => {
     // await Speech.resume()
@@ -149,7 +155,14 @@ const BookReaderScreen = ({ route }) => {
       })
     }
     scrollToCurrentSentence()
-  }, [bookChapterContent, currentChapterIndex, currentSentenceIndex, sentences, isLoading, sentenceRefs])
+  }, [
+    bookChapterContent,
+    currentChapterIndex,
+    currentSentenceIndex,
+    sentences,
+    isLoading,
+    sentenceRefs
+  ])
 
   const scrollToCurrentSentence = useCallback(() => {
     if (
@@ -161,7 +174,14 @@ const BookReaderScreen = ({ route }) => {
         animated: true
       })
     }
-  }, [bookChapterContent, currentChapterIndex, currentSentenceIndex, sentences, isLoading, sentenceRefs])
+  }, [
+    bookChapterContent,
+    currentChapterIndex,
+    currentSentenceIndex,
+    sentences,
+    isLoading,
+    sentenceRefs
+  ])
 
   const toggleDescription = useCallback(() => {
     setShowFullDescription(prevState => !prevState)

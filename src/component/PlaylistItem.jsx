@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import React from 'react'
+import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native'
 
 const PlaylistItem = ({ title, image, onPress }) => (
   <TouchableOpacity onPress={onPress} style={styles.playlistItem}>
@@ -8,27 +8,27 @@ const PlaylistItem = ({ title, image, onPress }) => (
       <Text style={styles.playlistTitle}>{title}</Text>
     </View>
   </TouchableOpacity>
-);
+)
 
 const styles = StyleSheet.create({
   playlistItem: {
     flexDirection: 'row',
     marginBottom: 15,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   playlistImage: {
     width: 80,
     height: 80,
     marginRight: 10,
-    borderRadius: 5, // Add rounded corners for better aesthetics
+    borderRadius: 5 // Add rounded corners for better aesthetics
   },
   playlistInfo: {
-    flex: 1,
+    flex: 1
   },
   playlistTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-  },
-});
+    fontWeight: 'bold'
+  }
+})
 
-export default PlaylistItem;
+export default PlaylistItem

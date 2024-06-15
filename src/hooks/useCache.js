@@ -27,7 +27,7 @@ export default {
         if (expired < new Date() && CheckExpireCache) {
           return
         }
-        return dx?.data||""
+        return dx?.data || ''
       }
 
       return {}

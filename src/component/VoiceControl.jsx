@@ -9,7 +9,7 @@ import { SOCKET_URL } from '../util/config'
 
 const socket = io(SOCKET_URL)
 
-export const VoiceControlComponent = ({handleUserCommand, ...props}) => {
+export const VoiceControlComponent = ({ handleUserCommand, ...props }) => {
   // const navigation = useNavigation()
   const [recording, setRecording] = useState(null)
   const [transcription, setTranscription] = useState('')

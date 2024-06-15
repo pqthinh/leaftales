@@ -129,7 +129,7 @@ const UserInfoScreen = () => {
     }))
     setCurrentQuestionIndex(currentQuestionIndex + 1)
     setIsLoading(false)
-    if (currentQuestionIndex < questions.length -1) return
+    if (currentQuestionIndex < questions.length - 1) return
     Speech.speak(
       'Cảm ơn bạn đã cung cấp thông tin.\n Hệ thống sẽ đề xuất một số cuốn sách phù hợp với bạn.\n Xin vui lòng chờ trong giây lát!',
       { language: 'vi' }
@@ -144,7 +144,6 @@ const UserInfoScreen = () => {
       })
       navigation.navigate('HomeStack')
     }, 10000)
-
   }
 
   return (

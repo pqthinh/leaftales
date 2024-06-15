@@ -5,7 +5,7 @@ import useCache from '../hooks/useCache' // Assuming you're using React Navigati
 
 const SettingsScreen = () => {
   const navigation = useNavigation()
-  const {clear} = useCache
+  const { clear } = useCache
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
 
@@ -37,9 +37,9 @@ const SettingsScreen = () => {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={async() => {
+        onPress={async () => {
           await clear()
-          navigation.navigate("SplashScreen")
+          navigation.navigate('SplashScreen')
         }}
       >
         <Text style={styles.buttonText}>Logout</Text>

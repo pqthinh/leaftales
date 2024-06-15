@@ -1,31 +1,31 @@
-import React, { useState } from 'react';
-import { View, Button, StyleSheet } from 'react-native';
-import { startRecording, stopRecording } from '../util/audioRecorder.js';
+import React, { useState } from 'react'
+import { View, Button, StyleSheet } from 'react-native'
+import { startRecording, stopRecording } from '../util/audioRecorder.js'
 
 const MicrophoneButton = ({ onStopRecording }) => {
-  const [recording, setRecording] = useState(null);
+  const [recording, setRecording] = useState(null)
 
   const handlePress = async () => {
     if (recording) {
-      const text = await stopRecording(recording);
-      onStopRecording(text);
-      setRecording(null);
+      const text = await stopRecording(recording)
+      onStopRecording(text)
+      setRecording(null)
     } else {
-      const newRecording = await startRecording();
-      setRecording(newRecording);
+      const newRecording = await startRecording()
+      setRecording(newRecording)
     }
-  };
+  }
 
   return (
     <View style={styles.container}>
       <Button
         title={recording ? 'Stop Recording' : 'Start Recording'}
         onPress={handlePress}
-        color="#6200EE"
+        color='#6200EE'
       />
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -34,8 +34,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
+    alignItems: 'center'
+  }
+})
 
-export default MicrophoneButton;
+export default MicrophoneButton

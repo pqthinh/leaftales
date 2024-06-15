@@ -40,25 +40,28 @@ const HomeScreen = () => {
   const handleUserCommandReadingBook = command => {
     const lowerCaseCommand = command.toLowerCase()
     if (lowerCaseCommand.includes('đọc')) {
-        const book = lowerCaseCommand.match(/số (\d+)/)
-        if (book && book.length>0) {
-          const book_id = parseInt(book[1], 10)
-          if (book_id >= 1 && book_id <= booksData.length) {
-            speakResult(`Đang mở sách số ${book_id}`)
-            let item = booksData[book_id-1]
-            dispatch(readBookDetail(item))
-            navigation.navigate('BookDetail', { ...item })
-          } else {
-            speakResult('Thứ tự sách không tồn tại', 'error')
-          }
+      const book = lowerCaseCommand.match(/số (\d+)/)
+      if (book && book.length > 0) {
+        const book_id = parseInt(book[1], 10)
+        if (book_id >= 1 && book_id <= booksData.length) {
+          speakResult(`Đang mở sách số ${book_id}`)
+          let item = booksData[book_id - 1]
+          dispatch(readBookDetail(item))
+          navigation.navigate('BookDetail', { ...item })
+        } else {
+          speakResult('Thứ tự sách không tồn tại', 'error')
         }
+      }
     } else if (
       lowerCaseCommand.includes('trang chủ') ||
       lowerCaseCommand.includes('đề xuất') ||
       lowerCaseCommand.includes('gợi ý')
     ) {
       navigation.navigate('HomeScreen')
-    } else if (lowerCaseCommand.includes('chuyển')||lowerCaseCommand.includes('mở')) {
+    } else if (
+      lowerCaseCommand.includes('chuyển') ||
+      lowerCaseCommand.includes('mở')
+    ) {
       if (
         lowerCaseCommand.includes('playlist') ||
         lowerCaseCommand.includes('lịch sử') ||
