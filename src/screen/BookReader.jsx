@@ -10,10 +10,13 @@ import {
 } from 'react-native'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { getBookDetail } from '../api/book'
-import { useFocusEffect } from '@react-navigation/native'
+import { useFocusEffect, useNavigation } from '@react-navigation/native'
+import speakResult from '../util/speakResult'
+import { VoiceControlComponent } from '../component/VoiceControl'
 import * as Speech from 'expo-speech'
 
 const BookReaderScreen = ({ route }) => {
+  const navigation = useNavigation()
   const book = route.params
   const [currentChapterIndex, setCurrentChapterIndex] = useState(1)
   const [bookChapterContent, setBookChapterContent] = useState(null)
@@ -67,7 +70,7 @@ const BookReaderScreen = ({ route }) => {
         rate: speechRate,
         volume: volume,
         onDone: () => {
-        //   console.log(currentSentenceIndex, sentences.length)
+          //   console.log(currentSentenceIndex, sentences.length)
           if (currentSentenceIndex < sentences.length - 1) {
             setCurrentSentenceIndex(prevIndex => {
               // speakCurrentSentence()
@@ -83,27 +86,41 @@ const BookReaderScreen = ({ route }) => {
         onError: () => setPlaybackState('stopped')
       })
     },
-    [currentChapterIndex, currentSentenceIndex, sentences, speechRate, volume, speakCurrentSentence]
+    [
+      currentChapterIndex,
+      currentSentenceIndex,
+      sentences,
+      speechRate,
+      volume,
+      speakCurrentSentence
+    ]
   )
 
   const speakCurrentSentence = useCallback(() => {
+    console.log(currentSentenceIndex, sentences)
     if (currentSentenceIndex < sentences.length) {
       speak(sentences[currentSentenceIndex])
       setPlaybackState('playing')
     }
-  }, [currentChapterIndex, currentSentenceIndex, sentences, speak])
+  }, [bookChapterContent, currentChapterIndex, currentSentenceIndex, sentences])
 
   const pauseSpeech = useCallback(async () => {
     // await Speech.pause()
     await Speech.stop()
     setPlaybackState('paused')
-  }, [currentChapterIndex, currentSentenceIndex, sentences, playbackState])
+  }, [bookChapterContent, currentChapterIndex, currentSentenceIndex, sentences, playbackState])
 
   const resumeSpeech = useCallback(async () => {
     // await Speech.resume()
     speakCurrentSentence()
     setPlaybackState('playing')
-  }, [currentChapterIndex, currentSentenceIndex, sentences, playbackState, speakCurrentSentence])
+  }, [
+    currentChapterIndex,
+    currentSentenceIndex,
+    sentences,
+    playbackState,
+    speakCurrentSentence
+  ])
 
   const stopSpeech = useCallback(async () => {
     await Speech.stop()
@@ -133,7 +150,7 @@ const BookReaderScreen = ({ route }) => {
       })
     }
     scrollToCurrentSentence()
-  }, [currentChapterIndex, currentSentenceIndex, sentences, isLoading])
+  }, [bookChapterContent, currentChapterIndex, currentSentenceIndex, sentences, isLoading])
 
   const scrollToCurrentSentence = useCallback(() => {
     if (
@@ -145,7 +162,7 @@ const BookReaderScreen = ({ route }) => {
         animated: true
       })
     }
-  }, [currentSentenceIndex])
+  }, [bookChapterContent, currentChapterIndex, currentSentenceIndex])
 
   const toggleDescription = useCallback(() => {
     setShowFullDescription(prevState => !prevState)
@@ -156,18 +173,111 @@ const BookReaderScreen = ({ route }) => {
       setCurrentChapterIndex(prevIndex => prevIndex + 1)
       setIsLoading(true)
     }
-  }, [currentChapterIndex, book.chapters.length])
+  }, [bookChapterContent, currentChapterIndex])
 
   const handlePreviousChapter = useCallback(() => {
     if (currentChapterIndex > 1) {
       setCurrentChapterIndex(prevIndex => prevIndex - 1)
       setIsLoading(true)
     }
-  }, [currentChapterIndex])
+  }, [bookChapterContent, currentChapterIndex])
 
   const getProgressPercentage = useCallback(() => {
     return Math.round((currentSentenceIndex / sentences.length) * 100)
-  }, [currentSentenceIndex, sentences])
+  }, [bookChapterContent, currentChapterIndex, currentSentenceIndex, sentences])
+
+  const handleUserCommandReadingBook = useCallback(
+    command => {
+      const lowerCaseCommand = command.toLowerCase()
+      console.log('lowerCaseCommand', lowerCaseCommand)
+      if (lowerCaseCommand.includes('tăng âm lượng')) {
+        adjustVolume(Math.min(1.0, volume + 0.1))
+        speakResult('Đã tăng âm lượng')
+      } else if (lowerCaseCommand.includes('giảm âm lượng')) {
+        adjustVolume(Math.max(0, volume - 0.1))
+        speakResult('Đã giảm âm lượng')
+      } else if (lowerCaseCommand.includes('dừng đọc')) {
+        stopSpeech()
+        speakResult('Đã dừng đọc')
+      } else if (lowerCaseCommand.includes('bắt đầu đọc')) {
+        speakCurrentSentence()
+        speakResult('Bắt đầu đọc')
+      } else if (lowerCaseCommand.includes('đọc tiếp')) {
+        if (playbackState === 'paused') {
+          resumeSpeech()
+          speakResult('Đọc tiếp')
+        } else {
+          speakCurrentSentence()
+          speakResult('Bắt đầu đọc')
+        }
+      } else if (lowerCaseCommand.includes('đọc lại')) {
+        speakCurrentSentence()
+        speakResult('Đọc lại câu hiện tại')
+      } else if (lowerCaseCommand.includes('mở chương')) {
+        const chapterNumberMatch = lowerCaseCommand.match(/chương (\d+)/)
+        if (chapterNumberMatch) {
+          const chapterNumber = parseInt(chapterNumberMatch[1], 10)
+          if (chapterNumber >= 1 && chapterNumber <= book.chapters.length) {
+            setCurrentChapterIndex(chapterNumber)
+            speakResult(`Đang mở chương ${chapterNumber}`)
+          } else {
+            speakResult('Chương không tồn tại')
+          }
+        } else {
+          speakResult('Không hiểu câu lệnh. Vui lòng thử lại.')
+        }
+      } else if (lowerCaseCommand.includes('chương trước')) {
+        handlePreviousChapter()
+        speakResult('Đang chuyển sang chương trước')
+      } else if (lowerCaseCommand.includes('chương sau')) {
+        handleNextChapter()
+        speakResult('Đang chuyển sang chương sau')
+      } else if (lowerCaseCommand.includes('tăng tốc độ')) {
+        adjustSpeed(Math.min(2.0, speechRate + 0.1))
+        speakResult('Đã tăng tốc độ đọc')
+      } else if (lowerCaseCommand.includes('giảm tốc độ')) {
+        adjustSpeed(Math.max(0.5, speechRate - 0.1))
+        speakResult('Đã giảm tốc độ đọc')
+      } else if (lowerCaseCommand.includes('quay lại')) {
+        navigation.goBack()
+        speakResult('Quay lại màn hình trước')
+      } else if (lowerCaseCommand.includes('chuyển đến')) {
+        if (
+          lowerCaseCommand.includes('playlist') ||
+          lowerCaseCommand.includes('lịch sử') ||
+          lowerCaseCommand.includes('danh sách')
+        ) {
+          navigation.navigate('PlayList')
+        } else if (
+          lowerCaseCommand.includes('trang chủ') ||
+          lowerCaseCommand.includes('đề xuất') ||
+          lowerCaseCommand.includes('gợi ý')
+        ) {
+          navigation.navigate('HomeScreen')
+        } else if (lowerCaseCommand.includes('cài đặt')) {
+          navigation.navigate('SettingScreen')
+        } else if (lowerCaseCommand.includes('tra cứu')) {
+          navigation.navigate('Search')
+        }
+      } else if (lowerCaseCommand.includes('lưu sách')) {
+        setPlaylist([...playlist, book])
+        speakResult('Đã lưu sách vào playlist')
+      } else if (lowerCaseCommand.includes('xem playlist')) {
+        if (playlist.length === 0) {
+          speakResult('Playlist trống')
+        } else {
+          const playlistNames = playlist.map(book => book.name).join(', ')
+          speakResult(`Danh sách sách yêu thích của bạn: ${playlistNames}`)
+        }
+      } else if (lowerCaseCommand.includes('xóa playlist')) {
+        setPlaylist([])
+        speakResult('Đã xóa playlist')
+      } else {
+        // speakResult('Không hiểu câu lệnh. Vui lòng thử lại.')
+      }
+    },
+    [currentChapterIndex, currentSentenceIndex, sentences, speak]
+  )
 
   return (
     <View style={styles.container}>
@@ -258,32 +368,32 @@ const BookReaderScreen = ({ route }) => {
 
             <View style={styles.verticalControls}>
               <TouchableOpacity
-                onPress={() => adjustVolume(volume + 0.1)}
+                onPress={() => setVolume(volume + 0.1)}
                 style={styles.controlButton}
               >
                 <Icon name='volume-high' size={30} color='black' />
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => adjustVolume(volume - 0.1)}
+                onPress={() => setVolume(volume - 0.1)}
                 style={styles.controlButton}
               >
                 <Icon name='volume-low' size={30} color='black' />
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => adjustSpeed(Math.max(0.5, speechRate - 0.1))}
+                onPress={() => setSpeechRate(Math.max(0.5, speechRate - 0.1))}
                 style={styles.controlButton}
               >
                 <Icon name='walk' size={30} color='black' />
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={() => adjustSpeed(1.0)}
+                onPress={() => setSpeechRate(1.0)}
                 style={styles.controlButton}
               >
                 <Icon name='speedometer' size={30} color='black' />
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => adjustSpeed(Math.min(2.0, speechRate + 0.1))}
+                onPress={() => setSpeechRate(Math.min(2.0, speechRate + 0.1))}
                 style={styles.controlButton}
               >
                 <Icon name='rocket' size={30} color='black' />
@@ -305,6 +415,11 @@ const BookReaderScreen = ({ route }) => {
           </View>
         </View>
       )}
+      <View style={{ height: 0 }}>
+        <VoiceControlComponent
+          handleUserCommand={handleUserCommandReadingBook}
+        />
+      </View>
     </View>
   )
 }

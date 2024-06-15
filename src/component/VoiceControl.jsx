@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react'
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native'
 import { Audio } from 'expo-av'
 import io from 'socket.io-client'
-import { useNavigation } from '@react-navigation/native'
+// import { useNavigation } from '@react-navigation/native'
 import Icon from 'react-native-vector-icons/Ionicons'
-import { handleUserCommand } from '../util/voiceCommand'
+
 import { SOCKET_URL } from '../util/config'
 
 const socket = io(SOCKET_URL)
 
-export const VoiceControlComponent = () => {
-  const navigation = useNavigation()
+export const VoiceControlComponent = ({handleUserCommand, ...props}) => {
+  // const navigation = useNavigation()
   const [recording, setRecording] = useState(null)
   const [transcription, setTranscription] = useState('')
   const [isMicActive, setIsMicActive] = useState(false)
@@ -18,7 +18,7 @@ export const VoiceControlComponent = () => {
   useEffect(() => {
     socket.on('transcription', async text => {
       setTranscription(JSON.stringify(text))
-      await handleUserCommand(text, navigation)
+      await handleUserCommand(text)
     })
 
     return () => {
@@ -78,10 +78,10 @@ export const VoiceControlComponent = () => {
     }
   }
 
-  const controlNavigate = () => {
-    // navigation.navigate("BookDetail", { recordingName: 'Ghi âm mới' })
-    navigation.navigate('PlayList', { recordingName: 'Ghi âm mới' })
-  }
+  // const controlNavigate = () => {
+  //   // navigation.navigate("BookDetail", { recordingName: 'Ghi âm mới' })
+  //   navigation.navigate('PlayList', { recordingName: 'Ghi âm mới' })
+  // }
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>

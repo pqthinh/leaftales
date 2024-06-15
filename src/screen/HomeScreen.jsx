@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { View, Text, FlatList, StyleSheet } from 'react-native'
 import BookItem from '../component/BookItem'
-import { getBooksApi, rea } from '../api/book'
+import { getBooksApi } from '../api/book'
 import { useDispatch, useSelector } from 'react-redux'
-import { useNavigation } from '@react-navigation/native'
+import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { readBookDetail } from '../store/bookReducer'
+import { VoiceControlComponent } from '../component/VoiceControl'
+import speakResult from '../util/speakResult'
+import * as Speech from 'expo-speech'
 
 const HomeScreen = () => {
   const navigation = useNavigation()
@@ -19,11 +22,63 @@ const HomeScreen = () => {
     }
     fetch()
   }, [])
+
+  useFocusEffect(
+    React.useCallback(() => {
+      async function stop() {
+        Speech.stop()
+      }
+      stop()
+    }, [])
+  )
+
   const onBookPress = item => {
-    // console.log('list book content: ----> ', item)
     dispatch(readBookDetail(item))
     navigation.navigate('BookDetail', { ...item })
   }
+
+  const handleUserCommandReadingBook = command => {
+    const lowerCaseCommand = command.toLowerCase()
+    if (lowerCaseCommand.includes('đọc')) {
+        const book = lowerCaseCommand.match(/số (\d+)/)
+        if (book && book.length>0) {
+          const book_id = parseInt(book[1], 10)
+          if (book_id >= 1 && book_id <= booksData.length) {
+            speakResult(`Đang mở sách số ${book_id}`)
+            let item = booksData[book_id-1]
+            dispatch(readBookDetail(item))
+            navigation.navigate('BookDetail', { ...item })
+          } else {
+            speakResult('Thứ tự sách không tồn tại', 'error')
+          }
+        }
+    } else if (
+      lowerCaseCommand.includes('trang chủ') ||
+      lowerCaseCommand.includes('đề xuất') ||
+      lowerCaseCommand.includes('gợi ý')
+    ) {
+      navigation.navigate('HomeScreen')
+    } else if (lowerCaseCommand.includes('chuyển')) {
+      if (
+        lowerCaseCommand.includes('playlist') ||
+        lowerCaseCommand.includes('lịch sử') ||
+        lowerCaseCommand.includes('danh sách')
+      ) {
+        navigation.navigate('PlayList')
+      } else if (
+        lowerCaseCommand.includes('trang chủ') ||
+        lowerCaseCommand.includes('đề xuất') ||
+        lowerCaseCommand.includes('gợi ý')
+      ) {
+        navigation.navigate('HomeScreen')
+      } else if (lowerCaseCommand.includes('cài đặt')) {
+        navigation.navigate('SettingScreen')
+      } else if (lowerCaseCommand.includes('tra cứu')) {
+        navigation.navigate('Search')
+      }
+    }
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Đề xuất dành cho bạn:</Text>
@@ -41,6 +96,11 @@ const HomeScreen = () => {
         keyExtractor={item => item.id + item.name + item.coverImage}
         contentContainerStyle={styles.flatListContent}
       />
+      <View style={{ height: 0 }}>
+        <VoiceControlComponent
+          handleUserCommand={handleUserCommandReadingBook}
+        />
+      </View>
     </View>
   )
 }

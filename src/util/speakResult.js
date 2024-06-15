@@ -1,6 +1,6 @@
 import * as Speech from 'expo-speech';
 
-async function speakResult(result, type = 'success', language = 'vi') {
+const speakResult = (result, type = 'success', language = 'vi') => {
   let message = '';
 
   switch (type) {
@@ -18,7 +18,7 @@ async function speakResult(result, type = 'success', language = 'vi') {
   }
 
   try {
-    await Speech.speak(message, { language });
+    Speech.speak(message, { language });
   } catch (error) {
     console.error('Lỗi khi đọc thông báo:', error);
   }
