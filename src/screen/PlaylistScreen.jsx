@@ -1,64 +1,109 @@
-import React, { useState, useEffect } from 'react'
-import {
-  View,
-  Text,
-  FlatList,
-  ActivityIndicator,
-  StyleSheet
-} from 'react-native'
-import { useNavigation } from '@react-navigation/native' // Assuming you're using React Navigation
-import PlaylistItem from '../component/PlaylistItem' // Import the PlaylistItem component
+import React, { useEffect, useState } from 'react'
+import { View, Text, FlatList, StyleSheet } from 'react-native'
+import BookItem from '../component/BookItem'
+import { getBooksApi } from '../api/book'
+import { useDispatch, useSelector } from 'react-redux'
+import { useFocusEffect, useNavigation } from '@react-navigation/native'
+import { readBookDetail } from '../store/bookReducer'
+import { VoiceControlComponent } from '../component/VoiceControl'
+import speakResult from '../util/speakResult'
+import * as Speech from 'expo-speech'
 
 const PlaylistScreen = () => {
   const navigation = useNavigation()
-  const [playlists, setPlaylists] = useState([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const dispatch = useDispatch()
+  const [booksData, setBooksData] = useState(useSelector(state => state.books))
 
   useEffect(() => {
-    const fetchPlaylists = async () => {
-      setIsLoading(true)
-      setError(null)
-
-      try {
-        const response = await fetch('https://your-api.com/playlists') // Replace with your API endpoint
-        const data = await response.json()
-        setPlaylists(data)
-      } catch (error) {
-        setError(error.message)
-      } finally {
-        setIsLoading(false)
-      }
+    async function fetch() {
+      await getBooksApi()
+      const books = useSelector(state => state.books)
+      setBooksData(books)
     }
-
-    fetchPlaylists()
+    fetch()
   }, [])
 
-  const handlePlaylistPress = playlistId => {
-    // Handle playlist selection (navigate to a playlist detail screen, play the playlist, etc.)
-    navigation.navigate('PlaylistDetail', { playlistId }) // Assuming a PlaylistDetail screen exists
+  useFocusEffect(
+    React.useCallback(() => {
+      async function stop() {
+        Speech.stop()
+      }
+      stop()
+    }, [])
+  )
+
+  const onBookPress = item => {
+    dispatch(readBookDetail(item))
+    navigation.navigate('BookDetail', { ...item })
+  }
+
+  const handleUserCommandReadingBook = command => {
+    const lowerCaseCommand = command.toLowerCase()
+    if (lowerCaseCommand.includes('đọc')) {
+      const book = lowerCaseCommand.match(/số (\d+)/)
+      if (book && book.length > 0) {
+        const book_id = parseInt(book[1], 10)
+        if (book_id >= 1 && book_id <= booksData.length) {
+          speakResult(`Đang mở sách số ${book_id}`)
+          let item = booksData[book_id - 1]
+          dispatch(readBookDetail(item))
+          navigation.navigate('BookDetail', { ...item })
+        } else {
+          speakResult('Thứ tự sách không tồn tại', 'error')
+        }
+      }
+    } else if (
+      lowerCaseCommand.includes('trang chủ') ||
+      lowerCaseCommand.includes('đề xuất') ||
+      lowerCaseCommand.includes('gợi ý')
+    ) {
+      navigation.navigate('HomeScreen')
+    } else if (lowerCaseCommand.includes('chuyển')||lowerCaseCommand.includes('mở')) {
+      if (
+        lowerCaseCommand.includes('playlist') ||
+        lowerCaseCommand.includes('lịch sử') ||
+        lowerCaseCommand.includes('danh sách')
+      ) {
+        navigation.navigate('PlayList')
+      } else if (
+        lowerCaseCommand.includes('trang chủ') ||
+        lowerCaseCommand.includes('đề xuất') ||
+        lowerCaseCommand.includes('gợi ý')
+      ) {
+        navigation.navigate('HomeScreen')
+      } else if (lowerCaseCommand.includes('cài đặt')) {
+        navigation.navigate('SettingScreen')
+      } else if (lowerCaseCommand.includes('tra cứu')) {
+        navigation.navigate('Search')
+      }
+    } else if (lowerCaseCommand.includes('quay lại')||lowerCaseCommand.includes('trở về')) {
+      
+      navigation.goBack()
+    } 
   }
 
   return (
     <View style={styles.container}>
-      {isLoading && <ActivityIndicator size='large' style={styles.loading} />}
-      {error && <Text style={styles.error}>Error: {error}</Text>}
-      {playlists.length > 0 ? (
-        <FlatList
-          data={playlists}
-          renderItem={({ item }) => (
-            <PlaylistItem
-              key={item.id} // Use a unique identifier (replace with your actual ID property)
-              title={item.title}
-              image={item.imageUrl} // Assuming image URL property exists
-              onPress={() => handlePlaylistPress(item.id)}
-            />
-          )}
-          keyExtractor={item => item.id} // Use a unique identifier for key extraction
+      <Text style={styles.heading}>Danh sách phát của bạn:</Text>
+      <FlatList
+        data={booksData}
+        renderItem={({ item }) => (
+          <BookItem
+            name={item.name}
+            author={item.author.name}
+            coverImage={item.coverImage}
+            onBookPress={() => onBookPress(item)}
+            key={item.id + item.name + item.coverImage}
+          />
+        )}
+        keyExtractor={item => item.id + item.name + item.coverImage}
+        contentContainerStyle={styles.flatListContent}
+      />
+      <View style={{ height: 0 }}>
+        <VoiceControlComponent
+          handleUserCommand={handleUserCommandReadingBook}
         />
-      ) : (
-        <Text>No playlists found.</Text>
-      )}
+      </View>
     </View>
   )
 }
@@ -68,11 +113,12 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20
   },
-  loading: {
-    marginTop: 20
+  heading: {
+    fontSize: 24,
+    marginBottom: 10
   },
-  error: {
-    color: 'red'
+  flatListContent: {
+    paddingBottom: 20
   }
 })
 

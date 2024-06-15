@@ -17,7 +17,6 @@ const SettingsScreen = () => {
     <View style={styles.container}>
       <Text style={styles.heading}>Settings</Text>
 
-      {/* Notifications Setting */}
       <View style={styles.setting}>
         <Text style={styles.settingLabel}>Notifications</Text>
         <Switch
@@ -29,7 +28,6 @@ const SettingsScreen = () => {
         />
       </View>
 
-      {/* About Us Button */}
       <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate('AboutUs')}
@@ -37,7 +35,6 @@ const SettingsScreen = () => {
         <Text style={styles.buttonText}>About Us</Text>
       </TouchableOpacity>
 
-      {/* Logout Button (replace with your logout functionality) */}
       <TouchableOpacity
         style={styles.button}
         onPress={async() => {

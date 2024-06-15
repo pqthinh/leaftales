@@ -97,7 +97,6 @@ const BookReaderScreen = ({ route }) => {
   )
 
   const speakCurrentSentence = useCallback(() => {
-    console.log(currentSentenceIndex, sentences)
     if (currentSentenceIndex < sentences.length) {
       speak(sentences[currentSentenceIndex])
       setPlaybackState('playing')
@@ -150,7 +149,7 @@ const BookReaderScreen = ({ route }) => {
       })
     }
     scrollToCurrentSentence()
-  }, [bookChapterContent, currentChapterIndex, currentSentenceIndex, sentences, isLoading])
+  }, [bookChapterContent, currentChapterIndex, currentSentenceIndex, sentences, isLoading, sentenceRefs])
 
   const scrollToCurrentSentence = useCallback(() => {
     if (
@@ -162,7 +161,7 @@ const BookReaderScreen = ({ route }) => {
         animated: true
       })
     }
-  }, [bookChapterContent, currentChapterIndex, currentSentenceIndex])
+  }, [bookChapterContent, currentChapterIndex, currentSentenceIndex, sentences, isLoading, sentenceRefs])
 
   const toggleDescription = useCallback(() => {
     setShowFullDescription(prevState => !prevState)
@@ -219,12 +218,14 @@ const BookReaderScreen = ({ route }) => {
           const chapterNumber = parseInt(chapterNumberMatch[1], 10)
           if (chapterNumber >= 1 && chapterNumber <= book.chapters.length) {
             setCurrentChapterIndex(chapterNumber)
+            // setCurrentChapterIndex(prevIndex => prevIndex + 1)
+            setIsLoading(true)
             speakResult(`Đang mở chương ${chapterNumber}`)
           } else {
             speakResult('Chương không tồn tại')
           }
         } else {
-          speakResult('Không hiểu câu lệnh. Vui lòng thử lại.')
+          // speakResult('Không hiểu câu lệnh. Vui lòng thử lại.')
         }
       } else if (lowerCaseCommand.includes('chương trước')) {
         handlePreviousChapter()

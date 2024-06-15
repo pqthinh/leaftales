@@ -58,7 +58,7 @@ const HomeScreen = () => {
       lowerCaseCommand.includes('gợi ý')
     ) {
       navigation.navigate('HomeScreen')
-    } else if (lowerCaseCommand.includes('chuyển')) {
+    } else if (lowerCaseCommand.includes('chuyển')||lowerCaseCommand.includes('mở')) {
       if (
         lowerCaseCommand.includes('playlist') ||
         lowerCaseCommand.includes('lịch sử') ||
