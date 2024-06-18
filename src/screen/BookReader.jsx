@@ -70,14 +70,11 @@ const BookReaderScreen = ({ route }) => {
         rate: speechRate,
         volume: volume,
         onDone: () => {
-          //   console.log(currentSentenceIndex, sentences.length)
           if (currentSentenceIndex < sentences.length - 1) {
             setCurrentSentenceIndex(prevIndex => {
-              // speakCurrentSentence()
               speak(sentences[prevIndex + 1])
               return prevIndex + 1
             })
-            // speakCurrentSentence()
           } else {
             setPlaybackState('stopped')
           }
@@ -161,12 +158,14 @@ const BookReaderScreen = ({ route }) => {
     currentSentenceIndex,
     sentences,
     isLoading,
-    sentenceRefs
+    sentenceRefs,
+    scrollViewRef
   ])
 
   const scrollToCurrentSentence = useCallback(() => {
     if (
       scrollViewRef.current &&
+      sentenceRefs.current[currentSentenceIndex] &&
       sentenceRefs.current[currentSentenceIndex]?.layout
     ) {
       scrollViewRef.current.scrollTo({
@@ -180,7 +179,8 @@ const BookReaderScreen = ({ route }) => {
     currentSentenceIndex,
     sentences,
     isLoading,
-    sentenceRefs
+    sentenceRefs,
+    scrollViewRef
   ])
 
   const toggleDescription = useCallback(() => {
